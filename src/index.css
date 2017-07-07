@@ -44,16 +44,14 @@ ol, ul {
 
 }
 
+.active {
+  background: green;
+  color: #fff;
+}
 
 .square:hover {
   cursor: pointer;
   background-color: #80cd92;
-}
-
-
-.active, .btn:hover {
-  background: green;
-  color: #fff;
 }
 
 .selected {

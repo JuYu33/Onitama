@@ -2,9 +2,9 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import App from './App';
 import './index.css';
-
+//<button className="square" onClick={() => props.onClick()}> //line7
 const Square = (props) => (
-  <button className="square" onClick={() => props.onClick()}>
+  <button className={props.active} onClick={() => props.onClick()}>
     {props.value}
   </button>
 )
@@ -19,7 +19,8 @@ class Board extends React.Component {
                 ['','','','',''],
                 ['o','o','O','o','o']],
       selected: '',
-      ping: 0
+      ping: 0,
+      activity: 'active'
     };
 
     //Added testClick
@@ -28,7 +29,7 @@ class Board extends React.Component {
 
   handleClick(x,y) {
     const squares = this.state.squares.slice();
-    let regexO = /[o]/
+    let regexO = /[oO]/
     let regexX = /[xX]/
 
     //test
@@ -36,20 +37,17 @@ class Board extends React.Component {
     if(regexO.test(squares[x][y]) && this.state.selected === '') {
       this.setState({selected: [x,y]});
       this.setState({ping: 1});
-      squares[x][y] = 'A'; //changes to A on click TODO style with CSS
+
     } else if (this.state.selected.length !== '' && this.state.ping === 1) {
       let selectX = this.state.selected[0];
       let selectY = this.state.selected[1];
+
+      squares[x][y] = squares[selectX][selectY] === 'O' ? 'O':'o';
       squares[selectX][selectY] = '';
 
       this.setState({selected: ''});
       this.setState({ping: 0});
-      squares[x][y] = 'o';
-      
     }
-
-
-    console.log(this.state.selected);
     
     this.setState({squares: squares});
 
@@ -60,7 +58,14 @@ class Board extends React.Component {
   }
 
   renderSquare(x,y) {
-    return <Square value={this.state.squares[x][y]} onClick={() => this.handleClick(x,y)} />;
+    let blah = "square";
+    //console.log("selected is here: ", this.state.selected, [x,y]);
+    if(this.state.selected[0] === x && this.state.selected[1] === y){
+      blah = `square ${this.state.activity}`;
+      //console.log(`{this.state.activity}`);
+    }
+
+    return <Square active={blah} value={this.state.squares[x][y]} onClick={() => this.handleClick(x,y)} />;
     //testClick
     //return <Square value={this.state.squares[i]} onClick={this.handleClick(i)} />;
   
