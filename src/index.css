@@ -74,3 +74,8 @@ ol, ul {
 .game-info {
   margin-left: 20px;
 }
+
+.player-card {
+  display: inline-block;
+  margin: 2px 10px;
+}

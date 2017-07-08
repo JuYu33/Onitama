@@ -1,13 +1,43 @@
 import React, {Component} from 'react';
 import ReactDOM from 'react-dom';
-import App from './App';
+//import App from './App';
+//import ReactFancybox from 'react-fancybox';
 import './index.css';
-//<button className="square" onClick={() => props.onClick()}> //line7
+
 const Square = (props) => (
   <button className={props.active} onClick={() => props.onClick()}>
     {props.value}
   </button>
 )
+
+class Cards extends Component {
+  constructor() {
+    super();
+    this.state = {
+      cards: {
+        triangle: [[-1,0],[1,-1],[1,1]],
+        upDown: [[-1,0],[1,0]],
+        backDiag: [[-1,1],[1,-1]],
+        forwDiag: [[-1,-1],[1,1]],
+        cross: [[-1,0],[0,1],[1,0],[0,-1]]
+      },
+      names: ['triangle', 'upDown', 'backDiag', 'forwDiag', 'cross']
+      //access with cards[names[x]]
+    }
+  }
+
+  render() {
+    console.log(this.state.names.length);
+
+
+    return (
+      <div>
+        <div className="player-card"><h1>CARD 1</h1></div>
+        <div className="player-card"><h1>CARD 2</h1></div>
+      </div>
+    )
+  }
+}
 
 class Board extends Component {
   constructor() {
@@ -22,17 +52,11 @@ class Board extends Component {
       ping: 0,
       activity: 'active'
     };
-
-    //Added testClick
-    //this.handleClick = this.handleClick.bind(this);
   }
 
   handleClick(x,y) {
     const squares = this.state.squares.slice();
     let regexO = /[oO]/
-    let regexX = /[xX]/
-
-    //test
 
     if(regexO.test(squares[x][y]) && this.state.selected === '') {
       this.setState({selected: [x,y]});
@@ -48,30 +72,19 @@ class Board extends Component {
       this.setState({selected: ''});
       this.setState({ping: 0});
     }
-    
     this.setState({squares: squares});
-
-  }
-
-  isActive(){
-    return null;
   }
 
   renderSquare(x,y) {
-    let blah = "square";
-    //console.log("selected is here: ", this.state.selected, [x,y]);
+    let classSqr = "square";
     if(this.state.selected[0] === x && this.state.selected[1] === y){
-      blah = `square ${this.state.activity}`;
-      //console.log(`{this.state.activity}`);
+      classSqr = `square ${this.state.activity}`;
     }
 
-    return <Square active={blah} value={this.state.squares[x][y]} onClick={() => this.handleClick(x,y)} />;
-    //testClick
-    //return <Square value={this.state.squares[i]} onClick={this.handleClick(i)} />;
-  
-}
+    return <Square active={classSqr} value={this.state.squares[x][y]} onClick={() => this.handleClick(x,y)} />;  
+  }
+
   render() {
-    const status = 'Next player: 1';
     return (
       <div>
         <div className="status">{status}</div>
@@ -111,6 +124,7 @@ class Board extends Component {
           {this.renderSquare(4,3)}
           {this.renderSquare(4,4)}
         </div>
+        <Cards />
       </div>
     );
   }
