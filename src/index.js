@@ -20,8 +20,7 @@ class Cards extends Component {
         backDiag: [[-1,1],[1,-1]],
         forwDiag: [[-1,-1],[1,1]],
         cross: [[-1,0],[0,1],[1,0],[0,-1]]
-      },
-      names: ['triangle', 'upDown', 'backDiag', 'forwDiag', 'cross']
+      }
       //access with cards[names[x]]
     }
   }
@@ -48,9 +47,9 @@ class Board extends Component {
                 ['','','','',''],
                 ['','','','',''],
                 ['o','o','O','o','o']],
+      cardName: ['triangle', 'upDown', 'backDiag', 'forwDiag', 'cross'],
       selected: '',
-      ping: 0,
-      activity: 'active'
+      ping: 0
     };
   }
 
@@ -76,15 +75,21 @@ class Board extends Component {
   }
 
   renderSquare(x,y) {
+
     let classSqr = "square";
     if(this.state.selected[0] === x && this.state.selected[1] === y){
-      classSqr = `square ${this.state.activity}`;
+      classSqr = `square active pointer`;
+    } else if(this.state.squares[x][y] === 'o' || this.state.squares[x][y] === 'O') {
+      classSqr = "square pointer";
     }
 
     return <Square active={classSqr} value={this.state.squares[x][y]} onClick={() => this.handleClick(x,y)} />;  
   }
 
+  //TODO abstact away renderSquares to render only when changed
   render() {
+    let x = Math.
+
     return (
       <div>
         <div className="status">{status}</div>
@@ -95,7 +100,6 @@ class Board extends Component {
           {this.renderSquare(0,3)}
           {this.renderSquare(0,4)}
         </div>
-
         <div className="board-row">
           {this.renderSquare(1,0)}
           {this.renderSquare(1,1)}
