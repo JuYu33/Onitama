@@ -51,9 +51,10 @@ ol, ul {
 
 .pointer {
   cursor: pointer;
+
 }
 
-.square:hover {
+.pointer:hover {
   background-color: #80cd92;
 }
 
