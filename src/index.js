@@ -14,25 +14,19 @@ class Cards extends Component {
   constructor() {
     super();
     this.state = {
-      cards: {
-        triangle: [[-1,0],[1,-1],[1,1]],
-        upDown: [[-1,0],[1,0]],
-        backDiag: [[-1,1],[1,-1]],
-        forwDiag: [[-1,-1],[1,1]],
-        cross: [[-1,0],[0,1],[1,0],[0,-1]]
-      }
+      //TODO: [x,y] remember to invert y
       //access with cards[names[x]]
     }
   }
 
   render() {
-    console.log(this.state.names.length);
-
-
+    //console.log(this.state.names.length);
     return (
       <div>
-        <div className="player-card"><h1>CARD 1</h1></div>
-        <div className="player-card"><h1>CARD 2</h1></div>
+        <div>
+          <div className="player-card"><h1>{this.props.nameOfCard1}</h1></div>
+          <div className="player-card"><h1>{this.props.nameOfCard2}</h1></div>
+        </div>
       </div>
     )
   }
@@ -47,9 +41,21 @@ class Board extends Component {
                 ['','','','',''],
                 ['','','','',''],
                 ['o','o','O','o','o']],
-      cardName: ['triangle', 'upDown', 'backDiag', 'forwDiag', 'cross'],
+      cards:  {
+                triangle: [[0,1],[1,-1],[-1,1]],
+                invTri: [[0,-1],[-1,1],[1,1]],
+                upDown: [[0,-1],[0,1]],
+                backDiag: [[1,1],[-1,-1]],
+                forwDiag: [[-1,1],[1,-1]],
+                cross: [[-1,0],[0,1],[1,0],[0,-1]],
+                front: [[-1,1],[0,1],[1,1]]
+              },
+      deck: ['triangle', 'invTri', 'upDown', 'backDiag', 'forwDiag', 'cross', 'front'],
       selected: '',
-      ping: 0
+      ping: 0,
+      player1Cards: ['',''],
+      player2Cards: ['',''],
+      p1CardSelectIndex: 0,
     };
   }
 
@@ -79,16 +85,32 @@ class Board extends Component {
     let classSqr = "square";
     if(this.state.selected[0] === x && this.state.selected[1] === y){
       classSqr = `square active pointer`;
-    } else if(this.state.squares[x][y] === 'o' || this.state.squares[x][y] === 'O') {
+    } else if(this.state.squares[x][y] === 'o' || this.state.squares[x][y] === 'O' || this.state.selected !== '') {
       classSqr = "square pointer";
     }
 
     return <Square active={classSqr} value={this.state.squares[x][y]} onClick={() => this.handleClick(x,y)} />;  
   }
 
-  //TODO abstact away renderSquares to render only when changed
+  //TODO abstract away renderSquares to render only when changed
   render() {
-    let x = Math.
+    let deckLen = this.state.deck.length;
+    console.log(this.state.player1Cards);
+    let p1Hand = this.state.player1Cards;
+    //{dealCard(p1Hand)}
+
+
+
+    
+
+    //if card slot empty, call pullCard();
+      //use set.State({})
+      //this.state.player1Cards[0] = pullCard();
+      //this.state.player1Cards[1] = pullCard();
+
+
+// Math.floor(Math.rand(this.state.deck.length));
+
 
     return (
       <div>
@@ -128,7 +150,7 @@ class Board extends Component {
           {this.renderSquare(4,3)}
           {this.renderSquare(4,4)}
         </div>
-        <Cards />
+        <Cards nameOfCard1={this.state.player1Cards[0]} nameOfCard2={this.state.player1Cards[1]}/>
       </div>
     );
   }
@@ -168,4 +190,40 @@ ReactDOM.render(
 function calculateWinner(condition) {
 
   return null;
+}
+
+function dealCard(player1hand){
+  let hand0 = player1hand[0];
+  let hand1 = player1hand[1];
+  if(hand0 === '') {
+    //hand0 = pullCard(this.state.deck);
+  }
+  if(hand1 === ''){
+    //hand1 = pullCard(this.state.deck);
+  }
+  this.setState({player1Cards: [hand0,hand1]});
+
+
+}
+
+function pullCard(theDeck) {
+  let tempDeck = this.state.deck.slice();
+  let randomIndex = null;
+  if(theDeck > 2){
+    randomIndex = Math.floor(Math.rand() * theDeck);
+  } else {
+    shuffleDiscard(); // need to replenish deck
+    randomIndex = Math.floor(Math.rand() * theDeck);
+  }
+
+  let returnCard = tempDeck.splice(randomIndex,1);
+  this.setState({deck: tempDeck});
+  console.log(this.state.deck);
+  return returnCard;
+}
+
+
+
+function shuffleDiscard(){
+
 }
