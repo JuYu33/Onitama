@@ -168,16 +168,27 @@ class Game extends Component {
       history: [],
       playerIsNext: true,
       deck: ['triangle', 'invTri', 'upDown', 'backDiag', 'forwDiag', 'cross', 'front'],
-      p1Hand: ["initial","second"],
-      p2Hand: ["",""]
+      discard: [],
+      p1Hand: ["",""],
+      p2Hand: ["",""],
+      start: false
     }
   }
 
   async gameStart(){
-    await dealCard.call(this, "p1Hand");
+    let tempDeck = this.state.deck.slice();
+    //deal cards to player 1
+    let newDeckState = dealCard.call(this, "p1Hand", tempDeck);
+    tempDeck = newDeckState[0];
+    await this.setState({p1Hand: [newDeckState[1][0], newDeckState[2][0]]})
+    newDeckState = dealCard.call(this, "p2Hand", tempDeck);
+    await this.setState({p2Hand: [newDeckState[1][0], newDeckState[2][0]]})
+    await this.setState({deck: newDeckState[0]});
 
     //console.log("Game starting");
-    console.log("Player1 hand: ", this.state.p1Hand);
+    //console.log("Player1 hand: ", this.state.p1Hand);
+    //console.log("Player2 hand: ", this.state.p2Hand);
+    //console.log("Cards left in Deck: ", this.state.deck);
   }
 
   render() {
@@ -200,7 +211,7 @@ class Game extends Component {
 // ========================================
 
 ReactDOM.render(
-  <Game />,
+  <Game p1Name="player1"/>,
   document.getElementById('container')
 );
 
@@ -210,48 +221,37 @@ function calculateWinner(condition) {
 }
 
 
-function dealCard(hand){
+function dealCard(hand, deck){
   console.log("Dealing cards");
   
+  let pulledCards = [];
+  let tempDeck = deck.slice();
   let hand0 = this.state[hand][0];
   let hand1 = this.state[hand][1];
 
   //console.log(hand0);
 
   if(hand0 === '') {
-    //hand0 = pullCard(this.state.deck);
+    let randomIndex = Math.floor(Math.random() * tempDeck);
+    hand0 = tempDeck.splice(randomIndex,1);
   }
   if(hand1 === ''){
-    //hand1 = pullCard(this.state.deck);
+    let randomIndex = Math.floor(Math.random() * tempDeck);
+    hand1 = tempDeck.splice(randomIndex,1);
   }
-  hand0 = "card1";
+  
   //console.log(hand0);
-  hand1 = "Card 2";
-  this.setState({[hand]: [hand0,hand1]});//TODO not player1hand
+  
+
+  //this.setState({[hand]: [hand0,hand1]});//TODO not player1hand
 
   //console.log("cards are now: ", this.state[hand]);
-  //return null;
+  return [tempDeck, hand0, hand1];
   
-}
-
-function pullCard(theDeck) {
-  let tempDeck = this.state.deck.slice();
-  let randomIndex = null;
-  if(theDeck > 2){
-    randomIndex = Math.floor(Math.rand() * theDeck);
-  } else {
-    shuffleDiscard(); // need to replenish deck
-    randomIndex = Math.floor(Math.rand() * theDeck);
-  }
-
-  let returnCard = tempDeck.splice(randomIndex,1);
-  this.setState({deck: tempDeck});
-  console.log(this.state.deck);
-  return returnCard;
 }
 
 
 
 function shuffleDiscard(){
-
+  return null;
 }
