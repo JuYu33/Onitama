@@ -10,17 +10,22 @@ const Square = (props) => (
   </button>
 )
 
+const Start = (props) => (
+  <button onClick={() => props.onClick()}>
+    Game Start
+  </button>
+)
+
 class Cards extends Component {
   constructor() {
     super();
     this.state = {
-      //TODO: [x,y] remember to invert y
+
       //access with cards[names[x]]
     }
   }
 
   render() {
-    //console.log(this.state.names.length);
     return (
       <div>
         <div>
@@ -41,6 +46,7 @@ class Board extends Component {
                 ['','','','',''],
                 ['','','','',''],
                 ['o','o','O','o','o']],
+      //TODO: [x,y] remember to invert y
       cards:  {
                 triangle: [[0,1],[1,-1],[-1,1]],
                 invTri: [[0,-1],[-1,1],[1,1]],
@@ -56,6 +62,7 @@ class Board extends Component {
       player1Cards: ['',''],
       player2Cards: ['',''],
       p1CardSelectIndex: 0,
+      flag: true
     };
   }
 
@@ -94,23 +101,21 @@ class Board extends Component {
 
   //TODO abstract away renderSquares to render only when changed
   render() {
+    /*
     let deckLen = this.state.deck.length;
-    console.log(this.state.player1Cards);
     let p1Hand = this.state.player1Cards;
-    //{dealCard(p1Hand)}
-
-
-
-    
+    if(this.state.flag) {
+      dealCard.call(this, p1Hand);
+      this.setState({flag: false});
+    }
+    */
 
     //if card slot empty, call pullCard();
       //use set.State({})
       //this.state.player1Cards[0] = pullCard();
       //this.state.player1Cards[1] = pullCard();
 
-
 // Math.floor(Math.rand(this.state.deck.length));
-
 
     return (
       <div>
@@ -161,15 +166,27 @@ class Game extends Component {
     super();
     this.state = {
       history: [],
-      playerIsNext: true
+      playerIsNext: true,
+      deck: ['triangle', 'invTri', 'upDown', 'backDiag', 'forwDiag', 'cross', 'front'],
+      p1Hand: ["initial","second"],
+      p2Hand: ["",""]
     }
+  }
+
+  async gameStart(){
+    await dealCard.call(this, "p1Hand");
+
+    //console.log("Game starting");
+    console.log("Player1 hand: ", this.state.p1Hand);
   }
 
   render() {
     return (
       <div className="game">
         <div className="game-board">
-          <Board />
+          <Start onClick={() => this.gameStart()}/>
+          <Board p1={this.state.p1Hand} p2={this.state.p2Hand}/>
+          
         </div>
         <div className="game-info">
           <div>{/* status */}This is Onitama</div>
@@ -192,18 +209,29 @@ function calculateWinner(condition) {
   return null;
 }
 
-function dealCard(player1hand){
-  let hand0 = player1hand[0];
-  let hand1 = player1hand[1];
+
+function dealCard(hand){
+  console.log("Dealing cards");
+  
+  let hand0 = this.state[hand][0];
+  let hand1 = this.state[hand][1];
+
+  //console.log(hand0);
+
   if(hand0 === '') {
     //hand0 = pullCard(this.state.deck);
   }
   if(hand1 === ''){
     //hand1 = pullCard(this.state.deck);
   }
-  this.setState({player1Cards: [hand0,hand1]});
+  hand0 = "card1";
+  //console.log(hand0);
+  hand1 = "Card 2";
+  this.setState({[hand]: [hand0,hand1]});//TODO not player1hand
 
-
+  //console.log("cards are now: ", this.state[hand]);
+  //return null;
+  
 }
 
 function pullCard(theDeck) {
