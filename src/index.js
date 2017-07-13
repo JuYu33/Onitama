@@ -20,17 +20,22 @@ class Cards extends Component {
   constructor() {
     super();
     this.state = {
-
-      //access with cards[names[x]]
     }
   }
 
+  //TODO: add card images
   render() {
     return (
       <div>
-        <div>
-          <div className="player-card"><h1>{this.props.nameOfCard1}</h1></div>
-          <div className="player-card"><h1>{this.props.nameOfCard2}</h1></div>
+        <div id="player1-box">
+          <div className="player-card">
+            <h1>{this.props.nameOfCard1}</h1>
+
+          </div>
+          <div className="player-card">
+            <h1>{this.props.nameOfCard2}</h1>
+
+          </div>
         </div>
       </div>
     )
@@ -101,22 +106,6 @@ class Board extends Component {
 
   //TODO abstract away renderSquares to render only when changed
   render() {
-    /*
-    let deckLen = this.state.deck.length;
-    let p1Hand = this.state.player1Cards;
-    if(this.state.flag) {
-      dealCard.call(this, p1Hand);
-      this.setState({flag: false});
-    }
-    */
-
-    //if card slot empty, call pullCard();
-      //use set.State({})
-      //this.state.player1Cards[0] = pullCard();
-      //this.state.player1Cards[1] = pullCard();
-
-// Math.floor(Math.rand(this.state.deck.length));
-
     return (
       <div>
         <div className="status">{status}</div>
@@ -155,7 +144,7 @@ class Board extends Component {
           {this.renderSquare(4,3)}
           {this.renderSquare(4,4)}
         </div>
-        <Cards nameOfCard1={this.state.player1Cards[0]} nameOfCard2={this.state.player1Cards[1]}/>
+        <Cards nameOfCard1={this.props.p1[0]} nameOfCard2={this.props.p1[1]}/>
       </div>
     );
   }
@@ -175,15 +164,17 @@ class Game extends Component {
     }
   }
 
+  //deal cards to players and load board
   async gameStart(){
     let tempDeck = this.state.deck.slice();
-    //deal cards to player 1
     let newDeckState = dealCard.call(this, "p1Hand", tempDeck);
     tempDeck = newDeckState[0];
     await this.setState({p1Hand: [newDeckState[1][0], newDeckState[2][0]]})
     newDeckState = dealCard.call(this, "p2Hand", tempDeck);
     await this.setState({p2Hand: [newDeckState[1][0], newDeckState[2][0]]})
     await this.setState({deck: newDeckState[0]});
+
+    this.setState({start: true});
 
     //console.log("Game starting");
     //console.log("Player1 hand: ", this.state.p1Hand);
@@ -192,12 +183,14 @@ class Game extends Component {
   }
 
   render() {
+    let gameState = this.state.start ? <Board p1={this.state.p1Hand} p2={this.state.p2Hand}/> : <Start onClick={() => this.gameStart()}/>;
+
     return (
       <div className="game">
         <div className="game-board">
-          <Start onClick={() => this.gameStart()}/>
-          <Board p1={this.state.p1Hand} p2={this.state.p2Hand}/>
-          
+
+          {gameState}
+
         </div>
         <div className="game-info">
           <div>{/* status */}This is Onitama</div>
@@ -222,14 +215,10 @@ function calculateWinner(condition) {
 
 
 function dealCard(hand, deck){
-  console.log("Dealing cards");
-  
   let pulledCards = [];
   let tempDeck = deck.slice();
   let hand0 = this.state[hand][0];
   let hand1 = this.state[hand][1];
-
-  //console.log(hand0);
 
   if(hand0 === '') {
     let randomIndex = Math.floor(Math.random() * tempDeck);
@@ -239,15 +228,8 @@ function dealCard(hand, deck){
     let randomIndex = Math.floor(Math.random() * tempDeck);
     hand1 = tempDeck.splice(randomIndex,1);
   }
-  
-  //console.log(hand0);
-  
 
-  //this.setState({[hand]: [hand0,hand1]});//TODO not player1hand
-
-  //console.log("cards are now: ", this.state[hand]);
   return [tempDeck, hand0, hand1];
-  
 }
 
 
