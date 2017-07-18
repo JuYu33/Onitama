@@ -52,6 +52,7 @@ class Board extends Component {
                 ['','','','',''],
                 ['o','o','O','o','o']],
       //TODO: [x,y] remember to invert y
+      //p2: invert x not y
       cards:  {
                 triangle: [[0,1],[1,-1],[-1,1]],
                 invTri: [[0,-1],[-1,1],[1,1]],
@@ -66,9 +67,16 @@ class Board extends Component {
       ping: 0,
       player1Cards: ['',''],
       player2Cards: ['',''],
+      validOptions: [],
       p1CardSelectIndex: 0,
       flag: true
     };
+  }
+
+  handleCardChoice(x){
+    let select = x;
+
+    this.setState({p1CardSelectIndex: select});
   }
 
   handleClick(x,y) {
@@ -78,6 +86,26 @@ class Board extends Component {
     if(regexO.test(squares[x][y]) && this.state.selected === '') {
       this.setState({selected: [x,y]});
       this.setState({ping: 1});
+
+      //Calculate valid Squares;
+      let cardName = this.state.player1Cards[this.state.p1CardSelectIndex];
+      let cardArr = this.state.cards[cardName];
+
+      for (let i = 0; i<cardArr.length; i++) {
+        let tempX = x + cardArr[i][0];
+        let tempY = y - cardArr[i][1];
+
+        if (tempX > 4 || tmepX < 0 || tempY > 4 || tempY < 0){
+          continue;
+        }
+
+        let tempArr = this.state.validOptions;
+        tempArr.push([tempX,tempY]);
+        this.setState({validOptions: tempArr});
+      }
+      //End Calculating valid Squares
+      
+
 
     } else if (this.state.selected.length !== '' && this.state.ping === 1) {
       let selectX = this.state.selected[0];
@@ -96,6 +124,7 @@ class Board extends Component {
 
     let classSqr = "square";
     if(this.state.selected[0] === x && this.state.selected[1] === y){
+      //TODO: Show valid Squares
       classSqr = `square active pointer`;
     } else if(this.state.squares[x][y] === 'o' || this.state.squares[x][y] === 'O' || this.state.selected !== '') {
       classSqr = "square pointer";
@@ -175,11 +204,6 @@ class Game extends Component {
     await this.setState({deck: newDeckState[0]});
 
     this.setState({start: true});
-
-    //console.log("Game starting");
-    //console.log("Player1 hand: ", this.state.p1Hand);
-    //console.log("Player2 hand: ", this.state.p2Hand);
-    //console.log("Cards left in Deck: ", this.state.deck);
   }
 
   render() {
