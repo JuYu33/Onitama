@@ -64,19 +64,18 @@ class Board extends Component {
               },
       deck: ['triangle', 'invTri', 'upDown', 'backDiag', 'forwDiag', 'cross', 'front'],
       selected: '',
-      ping: 0,
+      isSelected: false,
       player1Cards: ['',''],
       player2Cards: ['',''],
       validOptions: [],
-      p1CardSelectIndex: 0,
-      flag: true
+      p1CardIndex: 0,
     };
   }
 
   handleCardChoice(x){
     let select = x;
 
-    this.setState({p1CardSelectIndex: select});
+    this.setState({p1CardIndex: select});
   }
 
   handleClick(x,y) {
@@ -85,29 +84,21 @@ class Board extends Component {
 
     if(regexO.test(squares[x][y]) && this.state.selected === '') {
       this.setState({selected: [x,y]});
-      this.setState({ping: 1});
+      this.setState({isSelected: true});
 
       //Calculate valid Squares;
-      let cardName = this.state.player1Cards[this.state.p1CardSelectIndex];
-      let cardArr = this.state.cards[cardName];
-
-      for (let i = 0; i<cardArr.length; i++) {
-        let tempX = x + cardArr[i][0];
-        let tempY = y - cardArr[i][1];
-
-        if (tempX > 4 || tmepX < 0 || tempY > 4 || tempY < 0){
-          continue;
-        }
-
-        let tempArr = this.state.validOptions;
-        tempArr.push([tempX,tempY]);
-        this.setState({validOptions: tempArr});
-      }
+      let cardName = this.state.player1Cards[this.state.p1CardIndex];
+      let cardsArr = this.state.cards[cardName];
+      let tempArr = this.state.validOptions;
+      let validSquares = calculateValidSquares(x,y,cardsArr);
+      tempArr.push(validSquares);
+      this.setState({validOptions: tempArr});
+      
       //End Calculating valid Squares
       
 
 
-    } else if (this.state.selected.length !== '' && this.state.ping === 1) {
+    } else if (this.state.selected.length !== '' && this.state.isSelected) {
       let selectX = this.state.selected[0];
       let selectY = this.state.selected[1];
 
@@ -115,7 +106,7 @@ class Board extends Component {
       squares[selectX][selectY] = '';
 
       this.setState({selected: ''});
-      this.setState({ping: 0});
+      this.setState({isSelected: false});
     }
     this.setState({squares: squares});
   }
@@ -237,6 +228,20 @@ function calculateWinner(condition) {
   return null;
 }
 
+function calculateValidSquares(x,y,val){
+  let validSquares = [];
+  for (let i = 0; i<val.length; i++) {
+    let tempX = x + val[i][0];
+    let tempY = y - val[i][1];
+
+    if (tempX > 4 || tempX < 0 || tempY > 4 || tempY < 0){
+      continue;
+    } else {
+      validSquares.push([tempX,tempY]);
+    }
+  }
+  return validSquares;
+}
 
 function dealCard(hand, deck){
   let pulledCards = [];
