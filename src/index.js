@@ -28,7 +28,7 @@ class Cards extends Component {
     return (
       <div>
         <div id="player1-box">
-          <div className="player-card" className="selected-card" onClick={()=>this.handleClick}>
+          <div className="player-card selected-card" onClick={()=>this.handleClick}>
             <h1>{this.props.nameOfCard1}</h1>
 
           </div>
@@ -95,55 +95,61 @@ class Board extends Component {
   async handleClick(x,y) {
     const squares = this.state.squares.slice();
     let regexO = /[oO]/
+    let isValid = false;
+    for (let i = 0; i<this.state.validSquares.length; i++) {
+      if(x === this.state.validSquares[i][0] && y === this.state.validSquares[i][1]) {
+        isValid = true;
+      }
+    }
 
-    if(regexO.test(squares[x][y]) && this.state.selected === '') {
-      this.setState({selected: [x,y]});
-      this.setState({isSelected: true});
+    //if is oO & nothing selected set selected, get valid squares
+    if(regexO.test(squares[x][y]) && !this.state.isSelected) {
+      await this.setState({selected: [x,y]});
+      await this.setState({isSelected: true});
 
-      //Calculate valid Squares;
       let cardName = this.state.player1Cards[this.state.p1CardIndex];
       let cardArr = this.state.cards[cardName];
-      let tempSqr = await getValidSquares(x,y,cardArr);
+      let tempSqr = getValidSquares(x,y,cardArr);
+      let sqrL = tempSqr.length;
 
-      await this.setState({validSquares: tempSqr});
-      //End Calculating valid Squares
-
-    } else if (this.state.selected.length !== '' && this.state.isSelected) {
-      let selectX = this.state.selected[0];
-      let selectY = this.state.selected[1];
-      let oCase = squares[selectX][selectY] === 'O' ? 'O':'o';
-      
-      for (let i = 0; i<this.state.validSquares.length; i++){
-        if(this.state.validSquares[i][0] === x && this.state.validSquares[i][1] === y) {
-          squares[selectX][selectY] = '';
-          squares[x][y] = oCase;
-          this.setState({selected: ''});
-          this.setState({isSelected: false});
-          break;
+      for (let i = sqrL-1; i>=0; i--) {
+        if (regexO.test(squares[tempSqr[i][0]][tempSqr[i][1]])) {
+          tempSqr.splice(i,1);
         }
       }
+      await this.setState({validSquares: tempSqr});
 
-      // squares[selectX][selectY] = '';
-      // squares[x][y] = oCase;
-
-      // this.setState({selected: ''});
-      // this.setState({isSelected: false});
+    } else if (this.state.isSelected && isValid) { 
+      let prevX = this.state.selected[0];
+      let prevY = this.state.selected[1];
+      squares[x][y] = squares[prevX][prevY] === 'O' ? 'O':'o';
+      squares[prevX][prevY] = '';
+      this.setState({selected: ''});
+      this.setState({isSelected: false}); 
+    } else {
+      this.setState({selected: ''});
+      this.setState({isSelected: false});
     }
     this.setState({squares: squares});
   }
 
   renderSquare(x,y) {
     let classSqr = "square";
-    if(this.state.selected[0] === x && this.state.selected[1] === y){
-      //TODO: Show valid Squares
-      classSqr = `square active pointer`;
-    } else if(this.state.squares[x][y] === 'o' || this.state.squares[x][y] === 'O' || this.state.selected !== '') {
+    
+    if(this.state.isSelected){
       for (let i = 0; i<this.state.validSquares.length; i++){
         if(this.state.validSquares[i][0] === x && this.state.validSquares[i][1] === y) {
           classSqr = "square pointer";
-          break;
         }
       }
+    } else {
+      if(this.state.squares[x][y] === 'o' || this.state.squares[x][y] === 'O') {
+        classSqr = "square pointer";
+      }
+    }
+
+    if(this.state.selected[0] === x && this.state.selected[1] === y){
+      classSqr = `square active pointer`;
     }
 
     return <Square active={classSqr} value={this.state.squares[x][y]} onClick={() => this.handleClick(x,y)} />;  
@@ -202,7 +208,6 @@ class Game extends Component {
       history: [],
       playerIsNext: true,
       deck: ['triangle', 'invTri', 'upDown', 'backDiag', 'forwDiag', 'cross', 'front'],
-      discard: [],
       p1Hand: ["",""],
       p2Hand: ["",""],
       start: false
