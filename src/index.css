@@ -79,11 +79,39 @@ ol, ul {
   flex-direction: row;
 }
 
-.game-info {
-  margin-left: 20px;
+.next-card {
+  margin: auto;
+  width: 100px;
 }
 
-.player-card {
+.selected-card {
+  background-color: #6aeddd;
+}
+
+.card1 {
+  float: left;
   display: inline-block;
   margin: 2px 10px;
+  padding: 3px;
+
 }
+
+.card2 {
+  float: right;
+  margin-right: 20px;
+  clear: right;
+  padding: 3px;
+}
+
+#player-box {
+  font: 10px "Century Gothic", Futura, sans-serif;
+  min-width: 401px;
+  height: 100px;
+  margin: 10px 0px;
+}
+
+#clear-this {
+
+}
+
+
