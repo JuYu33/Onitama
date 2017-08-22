@@ -16,8 +16,8 @@ ol, ul {
   padding-left: 30px;
 } 
 
-.game-board {
-  margin: auto;
+#game-board {
+  /*margin: auto;*/
 }
 
 .board-row:after {
@@ -25,7 +25,7 @@ ol, ul {
   content: "";
   display: table;
   /*overflow: auto;*/
-  min-width: 401px;
+  min-width: 501px;
 }
 
 .status {
@@ -38,19 +38,24 @@ ol, ul {
   float: left;
   font-size: 40px;
   font-weight: bold;
-  line-height: 80px;
-  height: 80px;
+  line-height: 100px;
+  height: 100px;
   margin-right: -1px;
   margin-top: -1px;
   padding: 0;
   text-align: center;
-  width: 80px;
-
+  width: 100px;
 }
 
 .active {
-  background: green;
-  color: #fff;
+  background: #999;
+  color: black;
+  border: 3px solid #222;
+  position: absolute;
+  position: relative;
+  text-align: center;
+  display: table-cell;
+  vertical-align: middle;
 }
 
 .pointer {
@@ -59,7 +64,8 @@ ol, ul {
 }
 
 .pointer:hover {
-  background-color: #80cd92;
+  background-color: #999;
+  color: black;
 }
 
 .selected {
@@ -75,7 +81,9 @@ ol, ul {
 }
 
 .game {
+  margin: auto;
   display: flex;
+  max-width: 680px;
   flex-direction: row;
 }
 
@@ -91,27 +99,38 @@ ol, ul {
 .card1 {
   float: left;
   display: inline-block;
-  margin: 2px 10px;
-  padding: 3px;
 
+  height: 250px;
+  width: 250px;
+
+  border: 1px solid black;
 }
 
 .card2 {
   float: right;
-  margin-right: 20px;
   clear: right;
-  padding: 3px;
+  height: 250px;
+  width: 250px;
+
+  border: 1px solid black;
 }
 
 #player-box {
   font: 10px "Century Gothic", Futura, sans-serif;
-  min-width: 401px;
-  height: 100px;
-  margin: 10px 0px;
+  min-width: 501px;
+  height: 310px;
+  margin: 10px 0px 0px -5px;
+
+  border: 1px solid black;
 }
 
-#clear-this {
-
+#status-cards {
+  display: inline;
+  margin-left: 50px;
+  margin-top: 100px;
+  background-color: blue;
+  height: 500px;
+  width: 220px;
 }
 
 

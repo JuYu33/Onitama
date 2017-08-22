@@ -4,6 +4,7 @@ import ReactDOM from 'react-dom';
 //import ReactFancybox from 'react-fancybox';
 import './index.css';
 
+
 const Square = (props) => (
   <button className={props.active} onClick={() => props.onClick()}>
     {props.value}
@@ -19,6 +20,7 @@ const Start = (props) => (
 const Card = (props) => (
   <div className={props.className} onClick={() => props.onClick()}>
     <h1>{props.card}</h1>
+    <img src={props.src} alt={props.card} height="250px" width="250px"/>
   </div>
 )
 
@@ -52,7 +54,7 @@ class Board extends Component {
                 Ox: [[0,1], [0,-1], [1,0]],
                 Cobra: [[-1,0], [1,1], [1,-1]]
               },
-      deck: ['Tiger', 'Crab', 'Monkey', 'Crane', 'Dragon', 'Elephant', 'Mantis', 'Boar', 'Frog', 'Goose', 'Horse', 'Eel', 'Rabbit', 'Rooster', 'Ox', 'Cobra'],
+      deck: ['tiger', 'crab', 'monkey', 'crane', 'dragon', 'elephant', 'mantis', 'boar', 'frog', 'goose', 'horse', 'eel', 'rabbit', 'rooster', 'ox', 'cobra'],
       discard: [],
       selected: '',
       isSelected: false,
@@ -61,6 +63,7 @@ class Board extends Component {
       player2Cards: ['',''],
       validSquares: [],
       p1CardIndex: 0,
+      p2LastUsed: '',
       cardCss: ['card1 selected-card', 'card2']
     };
   }
@@ -123,6 +126,19 @@ class Board extends Component {
       }
       await this.setState({validSquares: tempSqr});
 
+      //if selected piece moves to valid square
+      //DONE: update positioning
+      //TODO: Check win condition
+      //      if (! YouWon) {
+      //        move used card to discard pile. 
+      //        update and clear CSS
+      //        deal next card
+      //        run Opponent turn function
+      //        check if opponent won
+      //        update following: opponent card, last used card, show next card
+      //      }
+      //      repeat
+      
     } else if (this.state.isSelected && isValid) { 
       let prevX = this.state.selected[0];
       let prevY = this.state.selected[1];
@@ -161,56 +177,64 @@ class Board extends Component {
   }
 
   render() {
+    let p2src = `/image/${this.state.player2Cards[0]}.png`;
+    console.log(p2src);
     return (
-      <div>
-        <div id="player-box">
-          <Card className="card1" card={this.state.player2Cards[0]}/>
-          <Card className="card2" card={this.state.player2Cards[1]}/>
+      <div className="game">
+        <div id="game-board">
+          <div id="player-box">
+            <Card className="card1" card={this.state.player2Cards[0]} src={p2src}/>
+            <Card className="card2" card={this.state.player2Cards[1]}/>
+          </div>
+          <div>
+            <div className="status">{status}</div>
+            <div className="board-row">
+              {this.renderSquare(0,0)}
+              {this.renderSquare(0,1)}
+              {this.renderSquare(0,2)}
+              {this.renderSquare(0,3)}
+              {this.renderSquare(0,4)}
+            </div>
+            <div className="board-row">
+              {this.renderSquare(1,0)}
+              {this.renderSquare(1,1)}
+              {this.renderSquare(1,2)}
+              {this.renderSquare(1,3)}
+              {this.renderSquare(1,4)}
+            </div>
+            <div className="board-row">
+              {this.renderSquare(2,0)}
+              {this.renderSquare(2,1)}
+              {this.renderSquare(2,2)}
+              {this.renderSquare(2,3)}
+              {this.renderSquare(2,4)}
+            </div>
+            <div className="board-row">
+              {this.renderSquare(3,0)}
+              {this.renderSquare(3,1)}
+              {this.renderSquare(3,2)}
+              {this.renderSquare(3,3)}
+              {this.renderSquare(3,4)}
+            </div>
+            <div className="board-row">
+              {this.renderSquare(4,0)}
+              {this.renderSquare(4,1)}
+              {this.renderSquare(4,2)}
+              {this.renderSquare(4,3)}
+              {this.renderSquare(4,4)}
+            </div>
+          </div>
+          <div id="player-box">
+            <Card className={this.state.cardCss[0]} card={this.state.player1Cards[0]} onClick={() => this.selectThisCard(true)}/>
+            <Card className={this.state.cardCss[1]} card={this.state.player1Cards[1]} onClick={() => this.selectThisCard(false)} />
+          </div>
         </div>
-        <div>
-          <div className="status">{status}</div>
-          <div className="board-row">
-            {this.renderSquare(0,0)}
-            {this.renderSquare(0,1)}
-            {this.renderSquare(0,2)}
-            {this.renderSquare(0,3)}
-            {this.renderSquare(0,4)}
-          </div>
-          <div className="board-row">
-            {this.renderSquare(1,0)}
-            {this.renderSquare(1,1)}
-            {this.renderSquare(1,2)}
-            {this.renderSquare(1,3)}
-            {this.renderSquare(1,4)}
-          </div>
-          <div className="board-row">
-            {this.renderSquare(2,0)}
-            {this.renderSquare(2,1)}
-            {this.renderSquare(2,2)}
-            {this.renderSquare(2,3)}
-            {this.renderSquare(2,4)}
-          </div>
-          <div className="board-row">
-            {this.renderSquare(3,0)}
-            {this.renderSquare(3,1)}
-            {this.renderSquare(3,2)}
-            {this.renderSquare(3,3)}
-            {this.renderSquare(3,4)}
-          </div>
-          <div className="board-row">
-            {this.renderSquare(4,0)}
-            {this.renderSquare(4,1)}
-            {this.renderSquare(4,2)}
-            {this.renderSquare(4,3)}
-            {this.renderSquare(4,4)}
-          </div>
-        </div>
-        <div id="player-box">
-          <Card className={this.state.cardCss[0]} card={this.state.player1Cards[0]} onClick={() => this.selectThisCard(true)}/>
-          <Card className={this.state.cardCss[1]} card={this.state.player1Cards[1]} onClick={() => this.selectThisCard(false)} />
-        </div>
-        <div>
+        <div id="status-cards">
+
+          
+          <h1>Your Next Card: </h1>
           <Card className="next-card" card={this.state.nextCard}/>
+
         </div>
       </div>
     );
@@ -235,12 +259,8 @@ class Game extends Component {
     let gameState = this.state.start ? <Board/> : <Start onClick={() => this.gameStart()}/>;
 
     return (
-      <div className="game">
-        <div className="game-board">
-
-          {gameState}
-
-        </div>
+      <div>
+        {gameState}
       </div>
     );
   }
