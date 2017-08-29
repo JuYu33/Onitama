@@ -4,6 +4,44 @@ import ReactDOM from 'react-dom';
 //import ReactFancybox from 'react-fancybox';
 import './index.css';
 
+//NOWDO
+
+const tiger = require('./img/tiger.png');
+const crab = require('./img/crab.png');
+const monkey = require('./img/monkey.png');
+const crane = require('./img/crane.png');
+const dragon = require('./img/dragon.png');
+const elephant = require('./img/elephant.png');
+const mantis = require('./img/mantis.png');
+const boar = require('./img/boar.png');
+const frog = require('./img/frog.png');
+const goose = require('./img/goose.png');
+const horse = require('./img/horse.png');
+const eel = require('./img/eel.png');
+const rabbit = require('./img/rabbit.png');
+const rooster = require('./img/rooster.png');
+const ox = require('./img/ox.png');
+const cobra = require('./img/cobra.png');
+
+/*
+import tiger from './img/tiger.png';
+import crab from './crab.png';
+import monkey from './monkey.png';
+import crane from './crane.png';
+import dragon from './dragon.png';
+import elephant from './elephant.png';
+import mantis from './mantis.png';
+import boar from './boar.png';
+import frog from './frog.png';
+import goose from './goose.png';
+import horse from './horse.png';
+import eel from './eel.png';
+import rabbit from './rabbit.png';
+import rooster from './rooster.png';
+import ox from './ox.png';
+import cobra from './cobra.png';
+*/
+
 
 const Square = (props) => (
   <button className={props.active} onClick={() => props.onClick()}>
@@ -18,10 +56,21 @@ const Start = (props) => (
 )
 
 const Card = (props) => (
+  //NOWDO
+/*
   <div className={props.className} onClick={() => props.onClick()}>
     <h1>{props.card}</h1>
-    <img src={props.src} alt={props.card} height="250px" width="250px"/>
+    <img src={(window[props.src])} alt={props.card} height="250px" width="250px"/> 
   </div>
+*/
+<div className="lineup">
+  <h1 className="card-name">{props.card}</h1>
+  <div className={props.className} onClick={() => props.onClick()}>
+    <img src={props.src}/> 
+  </div>
+</div>
+
+
 )
 
 class Board extends Component {
@@ -37,22 +86,22 @@ class Board extends Component {
       //p2: invert x not y
       isCaptured: {O: false, X: false},
       cards:  {
-                Tiger: [[0,2], [0,-1]],
-                Crab: [[-2,0], [0,1], [2,0]],
-                Monkey: [[-1,1], [1,1], [-1,-1], [1,-1]],
-                Crane: [[0,1], [-1,-1], [1,-1]],
-                Dragon: [[-2,1],[-1,-1],[1,-1],[2,1]],
-                Elephant: [[-1,1],[-1,0],[1,1],[1,0]],
-                Mantis: [[-1,1],[0,-1],[1,1]],
-                Boar: [[-1,0],[0,1],[1,0]],
-                Frog: [[-2,0], [-1,1], [1,-1]],
-                Goose: [[-1,1], [-1,0], [1,0], [1,-1]],
-                Horse: [[-1,0], [0,1], [0,-1]],
-                Eel: [[-1,1], [-1,-1], [1,0]],
-                Rabbit: [[-1,-1], [1,1], [2,0]],
-                Rooster: [[-1,-1], [-1,0], [1,0], [1,1]],
-                Ox: [[0,1], [0,-1], [1,0]],
-                Cobra: [[-1,0], [1,1], [1,-1]]
+                tiger: [[0,2], [0,-1]],
+                crab: [[-2,0], [0,1], [2,0]],
+                monkey: [[-1,1], [1,1], [-1,-1], [1,-1]],
+                crane: [[0,1], [-1,-1], [1,-1]],
+                dragon: [[-2,1],[-1,-1],[1,-1],[2,1]],
+                elephant: [[-1,1],[-1,0],[1,1],[1,0]],
+                mantis: [[-1,1],[0,-1],[1,1]],
+                boar: [[-1,0],[0,1],[1,0]],
+                frog: [[-2,0], [-1,1], [1,-1]],
+                goose: [[-1,1], [-1,0], [1,0], [1,-1]],
+                horse: [[-1,0], [0,1], [0,-1]],
+                eel: [[-1,1], [-1,-1], [1,0]],
+                rabbit: [[-1,-1], [1,1], [2,0]],
+                rooster: [[-1,-1], [-1,0], [1,0], [1,1]],
+                ox: [[0,1], [0,-1], [1,0]],
+                cobra: [[-1,0], [1,1], [1,-1]]
               },
       deck: ['tiger', 'crab', 'monkey', 'crane', 'dragon', 'elephant', 'mantis', 'boar', 'frog', 'goose', 'horse', 'eel', 'rabbit', 'rooster', 'ox', 'cobra'],
       discard: [],
@@ -79,6 +128,7 @@ class Board extends Component {
     await this.setState({player2Cards: [newDeckState[1][0], newDeckState[2][0]]})
     await this.setState({deck: newDeckState[0]});
 
+    //TODO: set state of deck and update accordingly.
     let nextCard = new Array(newDeckState[0][0]);
     await this.setState({nextCard: nextCard});
   }
@@ -119,11 +169,13 @@ class Board extends Component {
       let sqrL = tempSqr.length;
 
       //Prevent capturing your own pieces
+      /*
       for (let i = sqrL-1; i>=0; i--) {
         if (regexO.test(squares[tempSqr[i][0]][tempSqr[i][1]])) {
           tempSqr.splice(i,1);
         }
       }
+      */
       await this.setState({validSquares: tempSqr});
 
       //if selected piece moves to valid square
@@ -177,16 +229,22 @@ class Board extends Component {
   }
 
   render() {
-    let p2src = `/image/${this.state.player2Cards[0]}.png`;
-    console.log(p2src);
+    //NOWDO
+    let p1c1cardname = findConstCard(this.state.player1Cards[0]);
+    let p1c2cardname = findConstCard(this.state.player1Cards[1]);
+    let p2c1cardname = findConstCard(this.state.player2Cards[0]);
+    let p2c2cardname = findConstCard(this.state.player2Cards[1]);
+    let p2lastcard = findConstCard(this.state.p2LastUsed);
+    let p1nextcard = findConstCard(this.state.nextCard);
+
     return (
       <div className="game">
-        <div id="game-board">
+        <div id="TBA">
           <div id="player-box">
-            <Card className="card1" card={this.state.player2Cards[0]} src={p2src}/>
-            <Card className="card2" card={this.state.player2Cards[1]}/>
+            <Card className="card1" card={this.state.player2Cards[0]} src={p2c1cardname}/>
+            <Card className="card2" card={this.state.player2Cards[1]} src={p2c2cardname}/>
           </div>
-          <div>
+          <div id="game-board">
             <div className="status">{status}</div>
             <div className="board-row">
               {this.renderSquare(0,0)}
@@ -225,16 +283,15 @@ class Board extends Component {
             </div>
           </div>
           <div id="player-box">
-            <Card className={this.state.cardCss[0]} card={this.state.player1Cards[0]} onClick={() => this.selectThisCard(true)}/>
-            <Card className={this.state.cardCss[1]} card={this.state.player1Cards[1]} onClick={() => this.selectThisCard(false)} />
+            <Card className={this.state.cardCss[0]} card={this.state.player1Cards[0]} src={p1c1cardname} onClick={() => this.selectThisCard(true)}/>
+            <Card className={this.state.cardCss[1]} card={this.state.player1Cards[1]} src={p1c2cardname} onClick={() => this.selectThisCard(false)} />
           </div>
         </div>
         <div id="status-cards">
-
-          
-          <h1>Your Next Card: </h1>
-          <Card className="next-card" card={this.state.nextCard}/>
-
+          <h2>Opponent Used</h2>
+          <Card className="last-card" card={this.state.p2LastUsed} src={p2lastcard}/>
+          <Card className="next-card" card={this.state.nextCard} src={p1nextcard}/>
+          <h2>Your Next Card</h2>
         </div>
       </div>
     );
@@ -316,7 +373,42 @@ function getCard(hand, deck){
   return [tempDeck, hand0, hand1];
 }
 
-
+function findConstCard(card) {
+  if(card === 'tiger'){
+    return tiger;
+  } else if (card === 'monkey'){
+    return monkey;
+  } else if (card === 'crab'){
+    return crab;
+  } else if (card === 'crane'){
+    return crane;
+  } else if (card === 'dragon'){
+    return dragon;
+  } else if (card === 'elephant'){
+    return elephant;
+  } else if (card === 'mantis'){
+    return mantis;
+  } else if (card === 'boar'){
+    return boar;
+  } else if (card === 'frog'){
+    return frog;
+  } else if (card === 'goose'){
+    return goose;
+  } else if (card === 'horse'){
+    return horse;
+  } else if (card === 'eel'){
+    return eel;
+  } else if (card === 'rabbit'){
+    return rabbit;
+  } else if (card === 'rooster'){
+    return rooster;
+  } else if (card === 'ox'){
+    return ox;
+  } else if (card === 'cobra'){
+    return cobra
+  }
+  return null;
+}
 
 function shuffleDiscard(){
   return null;

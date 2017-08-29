@@ -18,6 +18,7 @@ ol, ul {
 
 #game-board {
   /*margin: auto;*/
+  margin-bottom: 20px;
 }
 
 .board-row:after {
@@ -85,52 +86,78 @@ ol, ul {
   display: flex;
   max-width: 680px;
   flex-direction: row;
+  margin-bottom: 100px;
 }
 
-.next-card {
-  margin: auto;
-  width: 100px;
+
+
+
+
+.lineup {
+  float:left;
+  display: inline-block;
 }
 
-.selected-card {
-  background-color: #6aeddd;
+.card-name {
+  text-align: center;
+  margin: 5px 65px;
+  border: 1px solid black;
 }
 
 .card1 {
   float: left;
   display: inline-block;
-
-  height: 250px;
-  width: 250px;
-
-  border: 1px solid black;
+  margin: auto;
+  margin-right: 1px;
 }
 
 .card2 {
   float: right;
+  display: inline-block;
+  margin: auto;
   clear: right;
-  height: 250px;
-  width: 250px;
+}
 
-  border: 1px solid black;
+.next-card {
+  text-align: center;
+  float: right;
+  display: inline-block;
+  clear: right;
+  margin: auto;
+  width: auto;
+}
+
+.last-card {
+  text-align: center;
+  margin-bottom: 50px;
 }
 
 #player-box {
   font: 10px "Century Gothic", Futura, sans-serif;
-  min-width: 501px;
-  height: 310px;
-  margin: 10px 0px 0px -5px;
-
-  border: 1px solid black;
+  min-width: 550px;
+  height: 302px;
+  margin: 10px 50px 20px -5px;
 }
 
 #status-cards {
   display: inline;
-  margin-left: 50px;
-  margin-top: 100px;
-  background-color: blue;
-  height: 500px;
-  width: 220px;
+  margin: auto;
+  
+}
+
+img {
+  width: 97%;
+  height: auto;
+
+  border: 2px solid black;
+}
+
+.selected-card {
+  background-color: #6aeddd;
+  padding-top: 3px;
+  padding-left: 3px;
+
+  border: 1px solid black;
 }
 
 
