@@ -34,10 +34,19 @@ const Start = (props) => (
   </button>
 )
 
+const SelectableCard = (props) => (
+  <div className={props.className}>
+    <h1 className="card-name">{props.card}</h1>
+    <div className="lineup" onClick={() => props.onClick()}>
+      <img src={props.src}/> 
+    </div>
+  </div>
+)
+
 const Card = (props) => (
-<div className="lineup">
+<div className={props.className}>
   <h1 className="card-name">{props.card}</h1>
-  <div className={props.className} onClick={() => props.onClick()}>
+  <div className="lineup">
     <img src={props.src}/> 
   </div>
 </div>
@@ -218,14 +227,14 @@ class Board extends Component {
     //NOWDO lastcard and next card not updated since card use not implemented.
     let p2lastcard = findConstCard(this.state.p2LastUsed);
     let p1nextcard = findConstCard(this.state.nextCard);
-    let selectCardPrompt = this.state.p1CardIndex >= 0 ? null : <h2>Please select one of your cards cards below</h2>
+    let selectCardPrompt = this.state.p1CardIndex >= 0 ? null : <h2 className="highlight">Please select one of your cards cards below</h2>
 
     return (
       <div className="game">
         <div id="TBA">
           <div id="player-box">
-            <Card className="card1" card={this.state.player2Cards[0]} src={p2c1cardname}/>
-            <Card className="card2" card={this.state.player2Cards[1]} src={p2c2cardname}/>
+            <Card className="card1" card={this.state.player2Cards[0]} src={p2c1cardname} />
+            <Card className="card2" card={this.state.player2Cards[1]} src={p2c2cardname} />
           </div>
           <div id="game-board">
             <div className="status">{status}</div>
@@ -267,8 +276,8 @@ class Board extends Component {
           </div>
           <div id="player-box">
             {selectCardPrompt}
-            <Card className={this.state.cardCss[0]} card={this.state.player1Cards[0]} src={p1c1cardname} onClick={() => this.selectThisCard(true)}/>
-            <Card className={this.state.cardCss[1]} card={this.state.player1Cards[1]} src={p1c2cardname} onClick={() => this.selectThisCard(false)} />
+            <SelectableCard className={this.state.cardCss[0]} card={this.state.player1Cards[0]} src={p1c1cardname} onClick={() => this.selectThisCard(true)}/>
+            <SelectableCard className={this.state.cardCss[1]} card={this.state.player1Cards[1]} src={p1c2cardname} onClick={() => this.selectThisCard(false)} />
           </div>
         </div>
         <div id="status-cards">

@@ -39,13 +39,13 @@ ol, ul {
   float: left;
   font-size: 40px;
   font-weight: bold;
-  line-height: 100px;
-  height: 100px;
+  line-height: 60px;
+  height: 70px;
   margin-right: -1px;
   margin-top: -1px;
   padding: 0;
   text-align: center;
-  width: 100px;
+  width: 70px;
 }
 
 .active {
@@ -84,14 +84,9 @@ ol, ul {
 .game {
   margin: auto;
   display: flex;
-  max-width: 680px;
+  max-width: 480px;
   flex-direction: row;
-  margin-bottom: 100px;
 }
-
-
-
-
 
 .lineup {
   float:left;
@@ -134,9 +129,8 @@ ol, ul {
 
 #player-box {
   font: 10px "Century Gothic", Futura, sans-serif;
-  min-width: 550px;
+  min-width: 590px;
   height: 302px;
-  margin: 10px 50px 20px -5px;
 }
 
 #status-cards {
@@ -146,9 +140,8 @@ ol, ul {
 }
 
 img {
-  width: 97%;
+  width: 55%;
   height: auto;
-
   border: 2px solid black;
 }
 
@@ -158,6 +151,11 @@ img {
   padding-left: 3px;
 
   border: 1px solid black;
+}
+
+.highlight {
+  background-color: red;
+  text-align: center;
 }
 
 
