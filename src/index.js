@@ -4,8 +4,6 @@ import ReactDOM from 'react-dom';
 //import ReactFancybox from 'react-fancybox';
 import './index.css';
 
-//NOWDO
-
 const tiger = require('./img/tiger.png');
 const crab = require('./img/crab.png');
 const monkey = require('./img/monkey.png');
@@ -22,26 +20,7 @@ const rabbit = require('./img/rabbit.png');
 const rooster = require('./img/rooster.png');
 const ox = require('./img/ox.png');
 const cobra = require('./img/cobra.png');
-
-/*
-import tiger from './img/tiger.png';
-import crab from './crab.png';
-import monkey from './monkey.png';
-import crane from './crane.png';
-import dragon from './dragon.png';
-import elephant from './elephant.png';
-import mantis from './mantis.png';
-import boar from './boar.png';
-import frog from './frog.png';
-import goose from './goose.png';
-import horse from './horse.png';
-import eel from './eel.png';
-import rabbit from './rabbit.png';
-import rooster from './rooster.png';
-import ox from './ox.png';
-import cobra from './cobra.png';
-*/
-
+const regexO = /[oO]/
 
 const Square = (props) => (
   <button className={props.active} onClick={() => props.onClick()}>
@@ -56,21 +35,12 @@ const Start = (props) => (
 )
 
 const Card = (props) => (
-  //NOWDO
-/*
-  <div className={props.className} onClick={() => props.onClick()}>
-    <h1>{props.card}</h1>
-    <img src={(window[props.src])} alt={props.card} height="250px" width="250px"/> 
-  </div>
-*/
 <div className="lineup">
   <h1 className="card-name">{props.card}</h1>
   <div className={props.className} onClick={() => props.onClick()}>
     <img src={props.src}/> 
   </div>
 </div>
-
-
 )
 
 class Board extends Component {
@@ -106,14 +76,14 @@ class Board extends Component {
       deck: ['tiger', 'crab', 'monkey', 'crane', 'dragon', 'elephant', 'mantis', 'boar', 'frog', 'goose', 'horse', 'eel', 'rabbit', 'rooster', 'ox', 'cobra'],
       discard: [],
       selected: '',
-      isSelected: false,
+      pieceIsSelected: false,
       nextCard: [],
       player1Cards: ['',''],
       player2Cards: ['',''],
       validSquares: [],
-      p1CardIndex: 0,
+      p1CardIndex: -1,
       p2LastUsed: '',
-      cardCss: ['card1 selected-card', 'card2']
+      cardCss: ['card1', 'card2']
     };
   }
 
@@ -133,24 +103,48 @@ class Board extends Component {
     await this.setState({nextCard: nextCard});
   }
 
-  selectThisCard(isCard1){
+  async selectThisCard(isCard1){
     if(isCard1){
-      this.setState({cardCss: ["card1 selected-card", "card2"]})
-      this.setState({p1CardIndex: 0})
+      await this.setState({cardCss: ["card1 selected-card", "card2"]})
+      await this.setState({p1CardIndex: 0})
+
+      //TDOO: Abstract set validSquares
     } else {
-      this.setState({cardCss: ["card1", "card2 selected-card"]})
-      this.setState({p1CardIndex: 1})
+      await this.setState({cardCss: ["card1", "card2 selected-card"]})
+      await this.setState({p1CardIndex: 1})
+
+      //TODO: set validSquares
     }
 
-    if(this.state.isSelected) {
-      this.setState({isSelected: false});
-      this.setState({selected: ''});
+    if(this.state.pieceIsSelected) {
+      const squares = this.state.squares.slice();
+      let cardName = this.state.player1Cards[this.state.p1CardIndex];
+      let cardArr = this.state.cards[cardName];
+
+      const tempSqr = getValidSquares(this.state.selected[0],this.state.selected[1],cardArr,squares);
+      let sqrL = tempSqr.length;
+
+      for (let i = sqrL-1; i>=0; i--) {
+        if (regexO.test(squares[tempSqr[i][0]][tempSqr[i][1]])) {
+          tempSqr.splice(i,1);
+        }
+      }
+      
+      await this.setState({validSquares: tempSqr});
+      console.log(this.state.validSquares);
     }
+
+    //TODO: this currently clears selection and validsquares after clicking a card... need to make dynamic
+    //Clear validsquares
+    //Invoke validsquares
+    //Call rendersquare with new parameters
   }
 
+  //TODO: handle right click to clear selected, pieceIsSelected, validSquares, remove also CSS to cards
+
   async handleClick(x,y) {
+    console.log(this.state.validSquares);
     const squares = this.state.squares.slice();
-    let regexO = /[oO]/
     let isValid = false;
     for (let i = 0; i<this.state.validSquares.length; i++) {
       if(x === this.state.validSquares[i][0] && y === this.state.validSquares[i][1]) {
@@ -159,24 +153,11 @@ class Board extends Component {
     }
 
     //if is oO & nothing selected set selected, get valid squares
-    if(regexO.test(squares[x][y]) && !this.state.isSelected) {
+    if(regexO.test(squares[x][y]) && !this.state.pieceIsSelected) { //clicked your own piece when nothing was clicked before
       await this.setState({selected: [x,y]});
-      await this.setState({isSelected: true});
+      await this.setState({pieceIsSelected: true});
 
-      let cardName = this.state.player1Cards[this.state.p1CardIndex];
-      let cardArr = this.state.cards[cardName];
-      let tempSqr = getValidSquares(x,y,cardArr);
-      let sqrL = tempSqr.length;
-
-      //Prevent capturing your own pieces
-      /*
-      for (let i = sqrL-1; i>=0; i--) {
-        if (regexO.test(squares[tempSqr[i][0]][tempSqr[i][1]])) {
-          tempSqr.splice(i,1);
-        }
-      }
-      */
-      await this.setState({validSquares: tempSqr});
+      
 
       //if selected piece moves to valid square
       //DONE: update positioning
@@ -189,18 +170,17 @@ class Board extends Component {
       //        check if opponent won
       //        update following: opponent card, last used card, show next card
       //      }
-      //      repeat
       
-    } else if (this.state.isSelected && isValid) { 
+    } else if (this.state.pieceIsSelected && isValid) { //moving your piece to a valid location
       let prevX = this.state.selected[0];
       let prevY = this.state.selected[1];
       squares[x][y] = squares[prevX][prevY] === 'O' ? 'O':'o';
       squares[prevX][prevY] = '';
       this.setState({selected: ''});
-      this.setState({isSelected: false}); 
-    } else {
+      this.setState({pieceIsSelected: false}); 
+    } else { //not a valid click clears everything
       this.setState({selected: ''});
-      this.setState({isSelected: false});
+      this.setState({pieceIsSelected: false});
     }
     this.setState({squares: squares});
   }
@@ -208,8 +188,8 @@ class Board extends Component {
   renderSquare(x,y) {
     let classSqr = "square";
     
-    //If a piece is selected, only show valid move options, otherwise pieces are selectable.
-    if(this.state.isSelected){
+    //If pieceIsSelected, only show valid move options, otherwise pieces are selectable.
+    if(this.state.pieceIsSelected){
       for (let i = 0; i<this.state.validSquares.length; i++){
         if(this.state.validSquares[i][0] === x && this.state.validSquares[i][1] === y) {
           classSqr = "square pointer";
@@ -229,13 +209,14 @@ class Board extends Component {
   }
 
   render() {
-    //NOWDO
     let p1c1cardname = findConstCard(this.state.player1Cards[0]);
     let p1c2cardname = findConstCard(this.state.player1Cards[1]);
     let p2c1cardname = findConstCard(this.state.player2Cards[0]);
     let p2c2cardname = findConstCard(this.state.player2Cards[1]);
+    //NOWDO lastcard and next card not updated since card use not implemented.
     let p2lastcard = findConstCard(this.state.p2LastUsed);
     let p1nextcard = findConstCard(this.state.nextCard);
+    let selectCardPrompt = this.state.p1CardIndex >= 0 ? null : <h2>Please select one of your cards cards below</h2>
 
     return (
       <div className="game">
@@ -283,6 +264,7 @@ class Board extends Component {
             </div>
           </div>
           <div id="player-box">
+            {selectCardPrompt}
             <Card className={this.state.cardCss[0]} card={this.state.player1Cards[0]} src={p1c1cardname} onClick={() => this.selectThisCard(true)}/>
             <Card className={this.state.cardCss[1]} card={this.state.player1Cards[1]} src={p1c2cardname} onClick={() => this.selectThisCard(false)} />
           </div>
@@ -335,7 +317,7 @@ function calculateWinner(condition) {
   return null;
 }
 
-function getValidSquares(x,y,val){
+function getValidSquares(x,y,val,sqArr){
   let validSquares = [];
   let tempX, tempY;
 
@@ -346,11 +328,12 @@ function getValidSquares(x,y,val){
     if (tempX > 4 || tempX < 0 || tempY > 4 || tempY < 0){
       continue;
     } else {
-      validSquares.push([tempX,tempY]);
+      if(!regexO.test(sqArr[tempX][tempY])){
+        validSquares.push([tempX,tempY]);
+      }
     }
   }
-  validSquares.push([x,y]);
-
+ 
   return validSquares;
 }
 
