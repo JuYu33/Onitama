@@ -120,15 +120,7 @@ class Board extends Component {
       const squares = this.state.squares.slice();
       let cardName = this.state.player1Cards[this.state.p1CardIndex];
       let cardArr = this.state.cards[cardName];
-
       const tempSqr = getValidSquares(this.state.selected[0],this.state.selected[1],cardArr,squares);
-      let sqrL = tempSqr.length;
-
-      for (let i = sqrL-1; i>=0; i--) {
-        if (regexO.test(squares[tempSqr[i][0]][tempSqr[i][1]])) {
-          tempSqr.splice(i,1);
-        }
-      }
       
       await this.setState({validSquares: tempSqr});
       console.log(this.state.validSquares);
@@ -153,7 +145,7 @@ class Board extends Component {
     }
 
     //if is oO & nothing selected set selected, get valid squares
-    if(regexO.test(squares[x][y]) && !this.state.pieceIsSelected) { //clicked your own piece when nothing was clicked before
+    if(regexO.test(squares[x][y]) && (!this.state.pieceIsSelected || regexO.test(squares[x][y]))) { //clicked your own piece when nothing was clicked before
       await this.setState({selected: [x,y]});
       await this.setState({pieceIsSelected: true});
 
@@ -170,6 +162,16 @@ class Board extends Component {
       //        check if opponent won
       //        update following: opponent card, last used card, show next card
       //      }
+
+      if(this.state.p1CardIndex >= 0){
+        const squares = this.state.squares.slice();
+        let cardName = this.state.player1Cards[this.state.p1CardIndex];
+        let cardArr = this.state.cards[cardName];
+        const tempSqr = getValidSquares(this.state.selected[0],this.state.selected[1],cardArr,squares);
+        
+        await this.setState({validSquares: tempSqr});
+        console.log(this.state.validSquares);
+      }
       
     } else if (this.state.pieceIsSelected && isValid) { //moving your piece to a valid location
       let prevX = this.state.selected[0];
