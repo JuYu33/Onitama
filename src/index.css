@@ -40,12 +40,12 @@ ol, ul {
   font-size: 40px;
   font-weight: bold;
   line-height: 60px;
-  height: 70px;
+  height: 80px;
   margin-right: -1px;
   margin-top: -1px;
   padding: 0;
   text-align: center;
-  width: 70px;
+  width: 80px;
 }
 
 .active {
@@ -82,7 +82,9 @@ ol, ul {
 }
 
 .game {
+  /* testing
   margin: auto;
+  */
   display: flex;
   max-width: 480px;
   flex-direction: row;
@@ -91,12 +93,16 @@ ol, ul {
 .lineup {
   float:left;
   display: inline-block;
+  width: 150px;
+  height: auto;
 }
 
 .card-name {
   text-align: center;
-  margin: 5px 65px;
+  padding: 2px 2px;
   border: 1px solid black;
+  border-radius: 2px;
+  width: 130px;
 }
 
 .card1 {
@@ -104,6 +110,8 @@ ol, ul {
   display: inline-block;
   margin: auto;
   margin-right: 1px;
+  width: 144px;
+  height: auto;
 }
 
 .card2 {
@@ -111,6 +119,8 @@ ol, ul {
   display: inline-block;
   margin: auto;
   clear: right;
+  width: 144px;
+  height: auto;
 }
 
 .next-card {
@@ -129,8 +139,8 @@ ol, ul {
 
 #player-box {
   font: 10px "Century Gothic", Futura, sans-serif;
-  min-width: 590px;
-  height: 302px;
+  width: 410px;
+  height: 202px;
 }
 
 #status-cards {
@@ -140,9 +150,10 @@ ol, ul {
 }
 
 img {
-  width: 55%;
+  width: 90%;
   height: auto;
   border: 2px solid black;
+  margin: auto;
 }
 
 .selected-card {

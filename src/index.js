@@ -187,13 +187,43 @@ class Board extends Component {
       let prevY = this.state.selected[1];
       squares[x][y] = squares[prevX][prevY] === 'O' ? 'O':'o';
       squares[prevX][prevY] = '';
-      this.setState({selected: ''});
-      this.setState({pieceIsSelected: false}); 
+      await this.setState({selected: ''});
+      await this.setState({pieceIsSelected: false}); 
+      //NOWDO: 
+      await this.setState({validsquares: ''});
+
+      let discard = this.state.player1Cards[this.state.p1CardIndex];
+      await this.setState({player1Cards[this.state.p1CardIndex] : ''}); //not sure if this works
+
+
+      //pulled from willmount
+      let tempDeck = this.state.deck.slice();
+      let newDeckState = getCard.call(this, "player1Cards", tempDeck);
+      tempDeck = newDeckState[0];
+      await this.setState({player1Cards: [newDeckState[1][0], newDeckState[2][0]]})
+      newDeckState = getCard.call(this, "player2Cards", tempDeck);
+      await this.setState({player2Cards: [newDeckState[1][0], newDeckState[2][0]]})
+      await this.setState({deck: newDeckState[0]});
+
+      //TODO: set state of deck and update accordingly.
+      let nextCard = new Array(newDeckState[0][0]);
+      await this.setState({nextCard: nextCard});
+
+
+
+      this.setState({p1CardIndex: -1});
+
+
+
+
+
+
     } else { //not a valid click clears everything
       this.setState({selected: ''});
       this.setState({pieceIsSelected: false});
     }
     this.setState({squares: squares});
+    //checkwincondition
   }
 
   renderSquare(x,y) {
