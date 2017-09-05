@@ -60,6 +60,17 @@ ol, ul {
   vertical-align: middle;
 }
 
+.cpuMove {
+  background: yellow;
+  color: black;
+  border: 3px solid #222;
+  position: absolute;
+  position: relative;
+  text-align: center;
+  display: table-cell;
+  vertical-align: middle;
+}
+
 .pointer {
   cursor: pointer;
 
@@ -132,11 +143,17 @@ ol, ul {
   display: inline-block;
   clear: right;
   width: auto;
+  margin-top: 100px;
+}
+
+.lastUsedHeader {
+  margin-top: -100px;
 }
 
 .last-card {
   text-align: center;
   height: 250px;
+  margin-top: -50px;
 }
 
 #player-box {
