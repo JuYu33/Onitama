@@ -178,28 +178,21 @@ class Board extends Component {
     } else if (this.state.pieceIsSelected && isValid) { //moving your piece to a valid location
       //TODO: Don't execute CPU turn if player1 won
       isCpuTurn = true;
-
+      let newXstate = false;
       if(squares[x][y] === 'x'){
-        // let newXstate = this.state.cpuState;
         if(this.state.cpuState.x1.position[0] === x && this.state.cpuState.x1.position[1] === y){
-          // newXstate.x1.isCaptured = true;
-          const newXstate = Object.assign({}, this.state.cpuState, {x1: {isCaptured: true}});
-          this.setState({cpuState: newXstate});
+          newXstate = Object.assign({}, this.state.cpuState, {x1: {isCaptured: true}});
         } else if (this.state.cpuState.x2.position[0] === x && this.state.cpuState.x2.position[1] === y){
-          // newXstate.x2.isCaptured = true;
-          const newXstate = Object.assign({}, this.state.cpuState, {x2: {isCaptured: true}});
-          this.setState({cpuState: newXstate});
+          newXstate = Object.assign({}, this.state.cpuState, {x2: {isCaptured: true}});
         } else if (this.state.cpuState.x3.position[0] === x && this.state.cpuState.x3.position[1] === y){
-          // newXstate.x3.isCaptured = true;
-          const newXstate = Object.assign({}, this.state.cpuState, {x3: {isCaptured: true}});
-          this.setState({cpuState: newXstate});
+          newXstate = Object.assign({}, this.state.cpuState, {x3: {isCaptured: true}});
         } else if (this.state.cpuState.x4.position[0] === x && this.state.cpuState.x4.position[1] === y){
-          // newXstate.x4.isCaptured = true;
-          const newXstate = Object.assign({}, this.state.cpuState, {x4: {isCaptured: true}});
-          this.setState({cpuState: newXstate});
+          newXstate = Object.assign({}, this.state.cpuState, {x4: {isCaptured: true}});
         }
       } else if (squares[x][y] === 'X'){
-        const newXstate = Object.assign({}, this.state.cpuState, {X: {isCaptured: true}});
+        newXstate = Object.assign({}, this.state.cpuState, {X: {isCaptured: true}});
+      }
+      if(newXstate){
         this.setState({cpuState: newXstate});
       }
       let tempDeck;
@@ -284,9 +277,8 @@ class Board extends Component {
 
       for (let i in xXs) {
         if (this.state.cpuState[xXs[i]].position === cpu[1]){
-          let newXstate = this.state.cpuState;
-          newXstate[xXs[i]].position = cpu[3];
-          this.setState({cpuState: newXstate});
+          const newXstate = Object.assign({}, this.state.cpuState, {[xXs[i]]: {isCaptured: false, position: cpu[3]}});
+          await this.setState({cpuState: newXstate});
         }
       }
 
@@ -358,10 +350,10 @@ class Board extends Component {
   }
 
   render() {
-    let p1c1cardname = findConstCard(this.state.player1Cards[0]);
-    let p1c2cardname = findConstCard(this.state.player1Cards[1]);
-    let p2c1cardname = findConstCard(this.state.player2Cards[0]);
-    let p2c2cardname = findConstCard(this.state.player2Cards[1]);
+    let p1card1img = findConstCard(this.state.player1Cards[0]);
+    let p1card2img = findConstCard(this.state.player1Cards[1]);
+    let p2card1img = findConstCard(this.state.player2Cards[0]);
+    let p2card2img = findConstCard(this.state.player2Cards[1]);
     let p2lastcard = findConstCard(this.state.p2LastUsed);
     let p1nextcard = findConstCard(this.state.nextCard);
 
@@ -373,8 +365,8 @@ class Board extends Component {
       <div className="game">
         <div id="TBA">
           <div id="player-box">
-            <Card className="card1 upside-down" card={this.state.player2Cards[0]} src={p2c1cardname} />
-            <Card className="card2 upside-down" card={this.state.player2Cards[1]} src={p2c2cardname} />
+            <Card className="card1 upside-down" card={this.state.player2Cards[0]} src={p2card1img} />
+            <Card className="card2 upside-down" card={this.state.player2Cards[1]} src={p2card2img} />
           </div>
           <div id="game-board">
             <div className="status">{status}</div>
@@ -416,8 +408,8 @@ class Board extends Component {
           </div>
           <div id="player-box">
             {selectCardPrompt}
-            <SelectableCard className={this.state.cardCss[0]} card={this.state.player1Cards[0]} src={p1c1cardname} onClick={() => this.selectThisCard(true)}/>
-            <SelectableCard className={this.state.cardCss[1]} card={this.state.player1Cards[1]} src={p1c2cardname} onClick={() => this.selectThisCard(false)} />
+            <SelectableCard className={this.state.cardCss[0]} card={this.state.player1Cards[0]} src={p1card1img} onClick={() => this.selectThisCard(true)}/>
+            <SelectableCard className={this.state.cardCss[1]} card={this.state.player1Cards[1]} src={p1card2img} onClick={() => this.selectThisCard(false)} />
           </div>
         </div>
         <div id="status-cards">
