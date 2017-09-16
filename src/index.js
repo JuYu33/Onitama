@@ -23,6 +23,12 @@ const ox = require('./img/ox.png');
 const cobra = require('./img/cobra.png');
 const regexO = /[oO]/
 
+
+/*
+================================================================================================
+Main Game Component
+================================================================================================
+*/
 class Game extends Component {
   constructor() {
     super();
@@ -66,41 +72,66 @@ class Game extends Component {
       isCaptured: false,
       cpuMoves: [],
       cpuState: {
-                      x1: {
-                            isCaptured: false,
-                            position: [0,0]
-                          },
-                      x2: {
-                            isCaptured: false,
-                            position: [0,1]
-                          },
-                      X:  {
-                            isCaptured: false,
-                            position: [0,2]
-                          },
-                      x3: {
-                            isCaptured: false,
-                            position: [0,3]
-                          },
-                      x4: {
-                            isCaptured: false,
-                            position: [0,4]
-                          }
-                    }
+                  x1: {
+                        isCaptured: false,
+                        position: [0,0]
+                      },
+                  x2: {
+                        isCaptured: false,
+                        position: [0,1]
+                      },
+                  X:  {
+                        isCaptured: false,
+                        position: [0,2]
+                      },
+                  x3: {
+                        isCaptured: false,
+                        position: [0,3]
+                      },
+                  x4: {
+                        isCaptured: false,
+                        position: [0,4]
+                      }
+                }
     };
   }
+
+  //From the props set the hands of players and update the deck.
+
+
+  async selectThisCard(isCard1){
+    if(isCard1){
+      await this.setState({cardCss: ["card1 selected-card", "card2"]})
+      await this.setState({p1CardIndex: 0})
+    } else {
+      await this.setState({cardCss: ["card1", "card2 selected-card"]})
+      await this.setState({p1CardIndex: 1})
+    }
+
+    if(this.state.pieceIsSelected) {
+      const squares = this.state.squares.slice();
+      let cardName = this.state.player1Cards[this.state.p1CardIndex];
+      let cardArr = this.state.cards[cardName];
+      const tempSqr = getValidSquares(this.state.selected[0],this.state.selected[1],cardArr,squares);
+      
+      await this.setState({validSquares: tempSqr});
+    }
+  }
+
 
   handleClick(x,y) {
     let isCpuTurn = false;
     const squares = this.state.squares.slice();
     let isValid = false;
+
+    //check if the clicked square is valid move if own piece is selected
     for (let i = 0; i<this.state.validSquares.length; i++) {
       if(x === this.state.validSquares[i][0] && y === this.state.validSquares[i][1]) {
         isValid = true;
       }
     }
 
-    //if is oO & nothing selected set selected, get valid squares
+    //if is oO & nothing selected, get valid squares
     if(regexO.test(squares[x][y]) && (!this.state.pieceIsSelected || regexO.test(squares[x][y]))) { //clicked your own piece when nothing was clicked before
       await this.setState({selected: [x,y]});
       await this.setState({pieceIsSelected: true});
@@ -184,19 +215,6 @@ class Game extends Component {
       await this.setState({deck: newDeckState[0]});
       await this.setState({nextCard: newDeckState[0][0]});
 
-      //if selected piece moves to valid square
-      //DONE: update positioning
-      //        deal next card
-      //        move used card to discard pile. 
-      //        CHANGE GETCARD TO NOT USE RANDOM
-      //        SHUFFLE DECK FIRST
-      //        SHUFFLE DISCARD WHEN <= 1;
-      //TODO: Check win condition
-      //      if (! YouWon) {
-      //        run Opponent turn function
-      //        check if opponent won
-      //        update following: opponent card, last used card, show next card
-      //      }
 
     } else { //not a valid click clears everything
       this.setState({selected: ''});
@@ -204,14 +222,11 @@ class Game extends Component {
     }
     this.setState({squares: squares});
 
-
     //TODO: opponent state
     
     if(isCpuTurn){
       //TODO: find out why this is creating new pieces with random moves
       let cpu = cpuTurn.call(this, "player2Cards", this.state.deck, this.state.positionO, squares);
-      // console.log(cpu);
-      //['open', pos, aCard, [tempX,tempY]]
       let xXs = ['X', 'x1', 'x2', 'x3', 'x4'];
 
       for (let i in xXs) {
@@ -262,7 +277,7 @@ class Game extends Component {
   }
 
   render() {
-    let gameState = this.state.start ? <Board onClick={(x,y) => this.handleClick(x,y)}/> : <Start onClick={() => this.gameStart()}/>;
+    let gameState = this.state.start ? <Board theState={this.state} onClick={(x,y) => this.handleClick(x,y)}/> : <Start onClick={() => this.gameStart()}/>;
 
     return (
       <div>
@@ -274,74 +289,9 @@ class Game extends Component {
 
 
 class Board extends Component {
-  constructor() {
-    super();
-    this.state = {
-      squares: [['x','x','X','x','x'],
-                ['','','','',''],
-                ['','','','',''],  
-                ['','','','',''],
-                ['o','o','O','o','o']],
-      positionO: [4,2],
-      cards:  {
-                tiger: [[0,2], [0,-1]],
-                crab: [[-2,0], [0,1], [2,0]],
-                monkey: [[-1,1], [1,1], [-1,-1], [1,-1]],
-                crane: [[0,1], [-1,-1], [1,-1]],
-                dragon: [[-2,1],[-1,-1],[1,-1],[2,1]],
-                elephant: [[-1,1],[-1,0],[1,1],[1,0]],
-                mantis: [[-1,1],[0,-1],[1,1]],
-                boar: [[-1,0],[0,1],[1,0]],
-                frog: [[-2,0], [-1,1], [1,-1]],
-                goose: [[-1,1], [-1,0], [1,0], [1,-1]],
-                horse: [[-1,0], [0,1], [0,-1]],
-                eel: [[-1,1], [-1,-1], [1,0]],
-                rabbit: [[-1,-1], [1,1], [2,0]],
-                rooster: [[-1,-1], [-1,0], [1,0], [1,1]],
-                ox: [[0,1], [0,-1], [1,0]],
-                cobra: [[-1,0], [1,1], [1,-1]]
-              },
-      deck: ['tiger', 'crab', 'monkey', 'crane', 'dragon', 'elephant', 'mantis', 'boar', 'frog', 'goose', 'horse', 'eel', 'rabbit', 'rooster', 'ox', 'cobra'],
-      discard: [],
-      selected: '',
-      pieceIsSelected: false,
-      nextCard: [],
-      player1Cards: ['',''],
-      player2Cards: ['',''],
-      validSquares: [],
-      p1CardIndex: -1,
-      p2LastUsed: '',
-      cardCss: ['card1', 'card2'],
-      isCaptured: false,
-      cpuMoves: [],
-      cpuState: {
-                      x1: {
-                            isCaptured: false,
-                            position: [0,0]
-                          },
-                      x2: {
-                            isCaptured: false,
-                            position: [0,1]
-                          },
-                      X:  {
-                            isCaptured: false,
-                            position: [0,2]
-                          },
-                      x3: {
-                            isCaptured: false,
-                            position: [0,3]
-                          },
-                      x4: {
-                            isCaptured: false,
-                            position: [0,4]
-                          }
-                    }
-    };
-  }
 
-  //From the props set the hands of players and update the deck.
   async componentWillMount() {
-    let tempDeck = this.state.deck.slice();
+    let tempDeck = this.props.deck.slice();
     tempDeck = shuffleDeck(tempDeck);
     let newDeckState = getCard.call(this, "player1Cards", tempDeck);
     tempDeck = newDeckState[0];
@@ -352,242 +302,55 @@ class Board extends Component {
     await this.setState({nextCard: newDeckState[0][0]});
   }
 
-  async selectThisCard(isCard1){
-    if(isCard1){
-      await this.setState({cardCss: ["card1 selected-card", "card2"]})
-      await this.setState({p1CardIndex: 0})
-    } else {
-      await this.setState({cardCss: ["card1", "card2 selected-card"]})
-      await this.setState({p1CardIndex: 1})
-    }
-
-    if(this.state.pieceIsSelected) {
-      const squares = this.state.squares.slice();
-      let cardName = this.state.player1Cards[this.state.p1CardIndex];
-      let cardArr = this.state.cards[cardName];
-      const tempSqr = getValidSquares(this.state.selected[0],this.state.selected[1],cardArr,squares);
-      
-      await this.setState({validSquares: tempSqr});
-    }
-
-  }
-
-  async handleClick(x,y) {
-    let isCpuTurn = false;
-    const squares = this.state.squares.slice();
-    let isValid = false;
-    for (let i = 0; i<this.state.validSquares.length; i++) {
-      if(x === this.state.validSquares[i][0] && y === this.state.validSquares[i][1]) {
-        isValid = true;
-      }
-    }
-
-    //if is oO & nothing selected set selected, get valid squares
-    if(regexO.test(squares[x][y]) && (!this.state.pieceIsSelected || regexO.test(squares[x][y]))) { //clicked your own piece when nothing was clicked before
-      await this.setState({selected: [x,y]});
-      await this.setState({pieceIsSelected: true});
-
-      if(this.state.p1CardIndex >= 0){
-        let cardName = this.state.player1Cards[this.state.p1CardIndex];
-        let cardArr = this.state.cards[cardName];
-        const tempSqr = getValidSquares(this.state.selected[0],this.state.selected[1],cardArr,squares);
-        
-        await this.setState({validSquares: tempSqr});
-        
-      }
-      
-    } else if (this.state.pieceIsSelected && isValid) { //moving your piece to a valid location
-      //TODO: Don't execute CPU turn if player1 won
-      isCpuTurn = true;
-      let newXstate = false;
-      if(squares[x][y] === 'x'){
-        if(this.state.cpuState.x1.position[0] === x && this.state.cpuState.x1.position[1] === y){
-          newXstate = Object.assign({}, this.state.cpuState, {x1: {isCaptured: true}});
-        } else if (this.state.cpuState.x2.position[0] === x && this.state.cpuState.x2.position[1] === y){
-          newXstate = Object.assign({}, this.state.cpuState, {x2: {isCaptured: true}});
-        } else if (this.state.cpuState.x3.position[0] === x && this.state.cpuState.x3.position[1] === y){
-          newXstate = Object.assign({}, this.state.cpuState, {x3: {isCaptured: true}});
-        } else if (this.state.cpuState.x4.position[0] === x && this.state.cpuState.x4.position[1] === y){
-          newXstate = Object.assign({}, this.state.cpuState, {x4: {isCaptured: true}});
-        }
-      } else if (squares[x][y] === 'X'){
-        newXstate = Object.assign({}, this.state.cpuState, {X: {isCaptured: true}});
-      }
-      if(newXstate){
-        this.setState({cpuState: newXstate});
-      }
-      let tempDeck;
-      //set new position
-      let prevX = this.state.selected[0];
-      let prevY = this.state.selected[1];
-      squares[x][y] = squares[prevX][prevY] === 'O' ? 'O':'o';
-      squares[prevX][prevY] = '';
-      await this.setState({selected: ''});
-      await this.setState({pieceIsSelected: false}); 
-      await this.setState({validsquares: ''});
-      if(squares[x][y] === 'O'){
-        this.setState({positionO: [x,y]});
-      }
-
-      //TODO: checkwincondition
-      if(this.state.cpuState.X.isCaptured){
-        this.setState({squares: squares});
-        console.log("you won?"); 
-        return;
-      }
-
-      //if not enough cards shuffle discard into deck;
-      if(this.state.deck.length <= 2){
-        let tempDiscard = this.state.discard.slice();
-        tempDeck = this.state.deck.slice();
-        tempDiscard = shuffleDeck(tempDiscard);
-        let deckDiscard = tempDeck.concat(tempDiscard);
-        await this.setState({deck: deckDiscard});
-        await this.setState({discard: []});
-      }
-
-      //put used card in discard
-      let discard = this.state.player1Cards[this.state.p1CardIndex];
-      let tempDiscard = this.state.discard;
-      tempDiscard.push(discard);
-      await this.setState({discard: tempDiscard});
-
-      //update card used and deck & update next card
-      let tempHand = this.state.player1Cards;
-      tempHand[this.state.p1CardIndex] = '';
-      await this.setState({player1Cards: tempHand});
-      tempDeck = this.state.deck.slice();
-      let newDeckState = getCard.call(this, "player1Cards", tempDeck);
-      if(this.state.p1CardIndex === 0) {
-        await this.setState({player1Cards: [newDeckState[1], newDeckState[2]]})
-      } else {
-        await this.setState({player1Cards: [newDeckState[1], newDeckState[2]]})
-      }      
-      await this.setState({deck: newDeckState[0]});
-      await this.setState({nextCard: newDeckState[0][0]});
-
-      //if selected piece moves to valid square
-      //DONE: update positioning
-      //        deal next card
-      //        move used card to discard pile. 
-      //        CHANGE GETCARD TO NOT USE RANDOM
-      //        SHUFFLE DECK FIRST
-      //        SHUFFLE DISCARD WHEN <= 1;
-      //TODO: Check win condition
-      //      if (! YouWon) {
-      //        run Opponent turn function
-      //        check if opponent won
-      //        update following: opponent card, last used card, show next card
-      //      }
-
-    } else { //not a valid click clears everything
-      this.setState({selected: ''});
-      this.setState({pieceIsSelected: false});
-    }
-    this.setState({squares: squares});
-
-
-    //TODO: opponent state
-    
-    if(isCpuTurn){
-      //TODO: find out why this is creating new pieces with random moves
-      let cpu = cpuTurn.call(this, "player2Cards", this.state.deck, this.state.positionO, squares);
-      // console.log(cpu);
-      //['open', pos, aCard, [tempX,tempY]]
-      let xXs = ['X', 'x1', 'x2', 'x3', 'x4'];
-
-      for (let i in xXs) {
-        if (this.state.cpuState[xXs[i]].position === cpu[1]){
-          const newXstate = Object.assign({}, this.state.cpuState, {[xXs[i]]: {isCaptured: false, position: cpu[3]}});
-          await this.setState({cpuState: newXstate});
-        }
-      }
-
-      let deckCopy = this.state.deck.slice();
-      //shuffle discard
-      if(deckCopy.length <= 2){
-        let tempDiscard = this.state.discard.slice();
-        const tempDeck = this.state.deck.slice();
-        tempDiscard = shuffleDeck(tempDiscard);
-        let deckDiscard = tempDeck.concat(tempDiscard);
-        await this.setState({deck: deckDiscard});
-        await this.setState({discard: []});
-      }
-
-      deckCopy = this.state.deck.slice();
-      const nextCard = deckCopy.splice(1,1);
-      const handCopy = this.state.player2Cards.slice();
-      if(handCopy[0] === cpu[2]){
-        handCopy[0] = nextCard[0];
-      } else {
-        handCopy[1] = nextCard[0];
-      }
-
-      squares[cpu[3][0]][cpu[3][1]] = squares[cpu[1][0]][cpu[1][1]] === 'X' ? 'X' : 'x';
-      squares[cpu[1][0]][cpu[1][1]] = '';
-
-      let usedCard = this.state.discard.slice();
-      usedCard.push(cpu[2]);
-
-      this.setState({discard: usedCard});
-      this.setState({cpuMoves: [[cpu[3][0], cpu[3][1]], [cpu[1][0], cpu[1][1]]]})
-      this.setState({player2Cards: handCopy});
-      this.setState({deck: deckCopy});
-      this.setState({p2LastUsed: cpu[2]});
-      this.setState({squares: squares});
-    }
-    //check if opponent won;
-  }
 
   renderSquare(x,y) {
     let classSqr = "square";
     
     //If pieceIsSelected, only show valid move options, otherwise pieces are selectable.
-    if(this.state.pieceIsSelected){
-      for (let i = 0; i<this.state.validSquares.length; i++){
-        if(this.state.validSquares[i][0] === x && this.state.validSquares[i][1] === y) {
+    if(this.props.pieceIsSelected){
+      for (let i = 0; i<this.props.validSquares.length; i++){
+        if(this.props.validSquares[i][0] === x && this.props.validSquares[i][1] === y) {
           classSqr = "square pointer";
         }
       }
     } else {
-      if(this.state.squares[x][y] === 'o' || this.state.squares[x][y] === 'O') {
+      if(this.props.squares[x][y] === 'o' || this.props.squares[x][y] === 'O') {
         classSqr = "square pointer";
       }
     }
     //If piece selected, highlight accordingly
-    if(this.state.selected[0] === x && this.state.selected[1] === y){
+    if(this.props.selected[0] === x && this.props.selected[1] === y){
       classSqr = `square active pointer`;
     }
 
     //TODO: CSS for opponent moves
-    if(this.state.cpuMoves.length > 0) {
-      if((this.state.cpuMoves[0][0] === x && this.state.cpuMoves[0][1] === y) || (this.state.cpuMoves[1][0] === x && this.state.cpuMoves[1][1] === y)){
+    if(this.props.cpuMoves.length > 0) {
+      if((this.props.cpuMoves[0][0] === x && this.props.cpuMoves[0][1] === y) || (this.props.cpuMoves[1][0] === x && this.props.cpuMoves[1][1] === y)){
         classSqr = `square cpuMove pointer`;
       }
     }
-    
-
-    return <Square active={classSqr} value={this.state.squares[x][y]} onClick={() => this.props.onClick(x,y)} />;  
+    return <Square active={classSqr} value={this.props.squares[x][y]} onClick={() => this.props.onClick(x,y)} />;  
   }
 
-  render() {
-    let p1card1img = findConstCard(this.state.player1Cards[0]);
-    let p1card2img = findConstCard(this.state.player1Cards[1]);
-    let p2card1img = findConstCard(this.state.player2Cards[0]);
-    let p2card2img = findConstCard(this.state.player2Cards[1]);
-    let p2lastcard = findConstCard(this.state.p2LastUsed);
-    let p1nextcard = findConstCard(this.state.nextCard);
 
-    let lastUsedHeader = this.state.p2LastUsed.length > 0 ? <h2 className="lastUsedHeader">Opponent Last Used: </h2> : null;
-    let lastUsed = this.state.p2LastUsed.length > 0 ? <Card className="last-card upside-down" card={this.state.p2LastUsed} src={p2lastcard}/> : null;
-    let selectCardPrompt = this.state.p1CardIndex >= 0 ? null : <h2 className="highlight">Please select one of your cards cards below</h2>;
+  render() {
+    let p1card1img = findConstCard(this.props.player1Cards[0]);
+    let p1card2img = findConstCard(this.props.player1Cards[1]);
+    let p2card1img = findConstCard(this.props.player2Cards[0]);
+    let p2card2img = findConstCard(this.props.player2Cards[1]);
+    let p2lastcard = findConstCard(this.props.p2LastUsed);
+    let p1nextcard = findConstCard(this.props.nextCard);
+
+    let lastUsedHeader = this.props.p2LastUsed.length > 0 ? <h2 className="lastUsedHeader">Opponent Last Used: </h2> : null;
+    let lastUsed = this.props.p2LastUsed.length > 0 ? <Card className="last-card upside-down" card={this.props.p2LastUsed} src={p2lastcard}/> : null;
+    let selectCardPrompt = this.props.p1CardIndex >= 0 ? null : <h2 className="highlight">Please select one of your cards cards below</h2>;
 
     return (
       <div className="game">
         <div id="TBA">
           <div id="player-box">
-            <Card className="card1 upside-down" card={this.state.player2Cards[0]} src={p2card1img} />
-            <Card className="card2 upside-down" card={this.state.player2Cards[1]} src={p2card2img} />
+            <Card className="card1 upside-down" card={this.props.player2Cards[0]} src={p2card1img} />
+            <Card className="card2 upside-down" card={this.props.player2Cards[1]} src={p2card2img} />
           </div>
           <div id="game-board">
             <div className="status">{status}</div>
@@ -629,14 +392,14 @@ class Board extends Component {
           </div>
           <div id="player-box">
             {selectCardPrompt}
-            <SelectableCard className={this.state.cardCss[0]} card={this.state.player1Cards[0]} src={p1card1img} onClick={() => this.selectThisCard(true)}/>
-            <SelectableCard className={this.state.cardCss[1]} card={this.state.player1Cards[1]} src={p1card2img} onClick={() => this.selectThisCard(false)} />
+            <SelectableCard className={this.props.cardCss[0]} card={this.props.player1Cards[0]} src={p1card1img} onClick={() => this.selectThisCard(true)}/>
+            <SelectableCard className={this.props.cardCss[1]} card={this.props.player1Cards[1]} src={p1card2img} onClick={() => this.selectThisCard(false)} />
           </div>
         </div>
         <div id="status-cards">
           {lastUsedHeader}
           {lastUsed}
-          <Card className="next-card" card={this.state.nextCard} src={p1nextcard}/>
+          <Card className="next-card" card={this.props.nextCard} src={p1nextcard}/>
           <h2>Your Next Card</h2>
         </div>
       </div>
@@ -674,18 +437,31 @@ const SelectableCard = (props) => (
   </div>
 )
 
-
-// ========================================
-
 ReactDOM.render(
   <Game p1Name="player1"/>,
   document.getElementById('container')
 );
 
-function calculateWinner(condition) {
 
-  return null;
-}
+// ==============================================================================================
+/*
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+*/
+// ==============================================================================================
+
 
 function cpuTurn(hand, deck, posO, sqArr) {
   let winningMoveFound = false;
