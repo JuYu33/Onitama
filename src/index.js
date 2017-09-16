@@ -4,7 +4,7 @@ import ReactDOM from 'react-dom';
 //import ReactFancybox from 'react-fancybox';
 import './index.css';
 
-const imgFolder = required('./img');
+
 const tiger = require('./img/tiger.png');
 const crab = require('./img/crab.png');
 const monkey = require('./img/monkey.png');
@@ -21,7 +21,7 @@ const rabbit = require('./img/rabbit.png');
 const rooster = require('./img/rooster.png');
 const ox = require('./img/ox.png');
 const cobra = require('./img/cobra.png');
-const regexO = /[oO]/
+const regexO = /[oO]/;
 
 
 /*
@@ -32,6 +32,7 @@ Main Game Component
 class Game extends Component {
   constructor() {
     super();
+
     this.state = {
       start: false,
       squares: [['x','x','X','x','x'],
@@ -98,11 +99,39 @@ class Game extends Component {
 
   //From the props set the hands of players and update the deck.
 
+  async componentWillMount() {
+    let tempDeck = this.state.deck.slice();
+    tempDeck = shuffleDeck(tempDeck);
+    let newDeckState = getCard.call(this, "player1Cards", tempDeck);
+    tempDeck = newDeckState[0];
+    await this.setState({player1Cards: [newDeckState[1], newDeckState[2]]})
+    newDeckState = getCard.call(this, "player2Cards", tempDeck);
+    await this.setState({player2Cards: [newDeckState[1], newDeckState[2]]})
+    await this.setState({deck: newDeckState[0]});
+    await this.setState({nextCard: newDeckState[0][0]});
+  }
+
+  async selectThisCard(isCard1){
+    if(isCard1){
+      await this.setState({cardCss: ["card1 selected-card", "card2"]})
+      await this.setState({p1CardIndex: 0})
+    } else {
+      await this.setState({cardCss: ["card1", "card2 selected-card"]})
+      await this.setState({p1CardIndex: 1})
+    }
+
+    if(this.state.pieceIsSelected) {
+      const squares = this.state.squares.slice();
+      let cardName = this.state.player1Cards[this.state.p1CardIndex];
+      let cardArr = this.state.cards[cardName];
+      const tempSqr = getValidSquares(this.state.selected[0],this.state.selected[1],cardArr,squares);
+      
+      await this.setState({validSquares: tempSqr});
+    }
+  }
 
 
-
-
-  handleClick(x,y) {
+  async handleClick(x,y) {
     let isCpuTurn = false;
     const squares = this.state.squares.slice();
     let isValid = false;
@@ -270,89 +299,86 @@ class Game extends Component {
   }
 }
 
+// ==============================================================================================
+/*
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+*/
+// ==============================================================================================
+
 
 class Board extends Component {
 
-  async componentWillMount() {
-    let tempDeck = this.props.state.deck.slice();
-    tempDeck = shuffleDeck(tempDeck);
-    let newDeckState = getCard.call(this, "player1Cards", tempDeck);
-    tempDeck = newDeckState[0];
-    await this.setState({player1Cards: [newDeckState[1], newDeckState[2]]})
-    newDeckState = getCard.call(this, "player2Cards", tempDeck);
-    await this.setState({player2Cards: [newDeckState[1], newDeckState[2]]})
-    await this.setState({deck: newDeckState[0]});
-    await this.setState({nextCard: newDeckState[0][0]});
-  }
+  constructor() {
+    super();
+    this.state = {
+      cardCss: ['card1', 'card2'],
 
-  async selectThisCard(isCard1){
-    if(isCard1){
-      await this.setState({cardCss: ["card1 selected-card", "card2"]})
-      await this.setState({p1CardIndex: 0})
-    } else {
-      await this.setState({cardCss: ["card1", "card2 selected-card"]})
-      await this.setState({p1CardIndex: 1})
-    }
-
-    if(this.state.pieceIsSelected) {
-      const squares = this.state.squares.slice();
-      let cardName = this.state.player1Cards[this.state.p1CardIndex];
-      let cardArr = this.state.cards[cardName];
-      const tempSqr = getValidSquares(this.state.selected[0],this.state.selected[1],cardArr,squares);
-      
-      await this.setState({validSquares: tempSqr});
     }
   }
+
 
 
   renderSquare(x,y) {
     let classSqr = "square";
     
     //If pieceIsSelected, only show valid move options, otherwise pieces are selectable.
-    if(this.props.state.pieceIsSelected){
-      for (let i = 0; i<this.props.state.validSquares.length; i++){
-        if(this.props.state.validSquares[i][0] === x && this.props.state.validSquares[i][1] === y) {
+    if(this.props.theState.pieceIsSelected){
+      for (let i = 0; i<this.props.theState.validSquares.length; i++){
+        if(this.props.theState.validSquares[i][0] === x && this.props.theState.validSquares[i][1] === y) {
           classSqr = "square pointer";
         }
       }
     } else {
-      if(this.props.state.squares[x][y] === 'o' || this.props.state.squares[x][y] === 'O') {
+      if(this.props.theState.squares[x][y] === 'o' || this.props.theState.squares[x][y] === 'O') {
         classSqr = "square pointer";
       }
     }
     //If piece selected, highlight accordingly
-    if(this.props.state.selected[0] === x && this.props.state.selected[1] === y){
+    if(this.props.theState.selected[0] === x && this.props.theState.selected[1] === y){
       classSqr = `square active pointer`;
     }
 
     //TODO: CSS for opponent moves
-    if(this.props.state.cpuMoves.length > 0) {
-      if((this.props.state.cpuMoves[0][0] === x && this.props.state.cpuMoves[0][1] === y) || (this.props.state.cpuMoves[1][0] === x && this.props.cpuMoves[1][1] === y)){
+    if(this.props.theState.cpuMoves.length > 0) {
+      if((this.props.theState.cpuMoves[0][0] === x && this.props.theState.cpuMoves[0][1] === y) || (this.props.theState.cpuMoves[1][0] === x && this.props.theState.cpuMoves[1][1] === y)){
         classSqr = `square cpuMove pointer`;
       }
     }
-    return <Square active={classSqr} value={this.props.state.squares[x][y]} onClick={() => this.props.state.onClick(x,y)} />;  
+    return <Square active={classSqr} value={this.props.theState.squares[x][y]} onClick={() => this.props.theState.onClick(x,y)} />;  
   }
 
 
   render() {
-    let p1card1img = findConstCard(this.props.player1Cards[0]);
-    let p1card2img = findConstCard(this.props.player1Cards[1]);
-    let p2card1img = findConstCard(this.props.player2Cards[0]);
-    let p2card2img = findConstCard(this.props.player2Cards[1]);
-    let p2lastcard = findConstCard(this.props.p2LastUsed);
-    let p1nextcard = findConstCard(this.props.nextCard);
+    let p1card1img = findConstCard(this.props.theState.player1Cards[0]);
+    let p1card2img = findConstCard(this.props.theState.player1Cards[1]);
+    let p2card1img = findConstCard(this.props.theState.player2Cards[0]);
+    let p2card2img = findConstCard(this.props.theState.player2Cards[1]);
+    let p2lastcard = findConstCard(this.props.theState.p2LastUsed);
+    let p1nextcard = findConstCard(this.props.theState.nextCard);
 
-    let lastUsedHeader = this.props.state.p2LastUsed.length > 0 ? <h2 className="lastUsedHeader">Opponent Last Used: </h2> : null;
-    let lastUsed = this.props.state.p2LastUsed.length > 0 ? <Card className="last-card upside-down" card={this.props.p2LastUsed} src={p2lastcard}/> : null;
-    let selectCardPrompt = this.props.state.p1CardIndex >= 0 ? null : <h2 className="highlight">Please select one of your cards cards below</h2>;
+    let lastUsedHeader = this.props.theState.p2LastUsed.length > 0 ? <h2 className="lastUsedHeader">Opponent Last Used: </h2> : null;
+    let lastUsed = this.props.theState.p2LastUsed.length > 0 ? <Card className="last-card upside-down" card={this.props.theState.p2LastUsed} src={p2lastcard}/> : null;
+    let selectCardPrompt = this.props.theState.p1CardIndex >= 0 ? null : <h2 className="highlight">Please select one of your cards cards below</h2>;
 
     return (
       <div className="game">
         <div id="TBA">
           <div id="player-box">
-            <Card className="card1 upside-down" card={this.props.state.player2Cards[0]} src={p2card1img} />
-            <Card className="card2 upside-down" card={this.props.state.player2Cards[1]} src={p2card2img} />
+            <Card className="card1 upside-down" card={this.props.theState.player2Cards[0]} src={p2card1img} />
+            <Card className="card2 upside-down" card={this.props.theState.player2Cards[1]} src={p2card2img} />
           </div>
           <div id="game-board">
             <div className="status">{status}</div>
@@ -394,20 +420,41 @@ class Board extends Component {
           </div>
           <div id="player-box">
             {selectCardPrompt}
-            <SelectableCard className={this.props.state.cardCss[0]} card={this.props.state.player1Cards[0]} src={p1card1img} onClick={() => this.selectThisCard(true)}/>
-            <SelectableCard className={this.props.state.cardCss[1]} card={this.props.state.player1Cards[1]} src={p1card2img} onClick={() => this.selectThisCard(false)} />
+            <SelectableCard className={this.props.theState.cardCss[0]} card={this.props.theState.player1Cards[0]} src={p1card1img} onClick={() => this.selectThisCard(true)}/>
+            <SelectableCard className={this.props.theState.cardCss[1]} card={this.props.theState.player1Cards[1]} src={p1card2img} onClick={() => this.selectThisCard(false)} />
           </div>
         </div>
         <div id="status-cards">
           {lastUsedHeader}
           {lastUsed}
-          <Card className="next-card" card={this.props.state.nextCard} src={p1nextcard}/>
+          <Card className="next-card" card={this.props.theState.nextCard} src={p1nextcard}/>
           <h2>Your Next Card</h2>
         </div>
       </div>
     );
   }
 }
+
+
+// ==============================================================================================
+/*
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+*/
+// ==============================================================================================
+
 
 const Square = (props) => (
   <button className={props.active} onClick={props.onClick}>
