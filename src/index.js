@@ -131,7 +131,7 @@ class Game extends Component {
       const squares = this.state.squares.slice();
       let isValid = false;
 
-      //check if the clicked square is valid move if own piece is selected
+      //check if the clicked square is valid move from selected position
       for (let i = 0; i<this.state.validSquares.length; i++) {
         if(x === this.state.validSquares[i][0] && y === this.state.validSquares[i][1]) {
           isValid = true;
@@ -153,22 +153,33 @@ class Game extends Component {
         //TODO: Don't execute CPU turn if player1 won
         isCpuTurn = true;
         let newXstate = false;
-        console.log('Before: ', this.state.cpuState);
         if(squares[x][y] === 'x'){
+          console.log('Before: ', this.state.cpuState);
           if(!this.state.cpuState.x1.isCaptured){
-
+            if(this.state.cpuState.x1.position[0] === x && this.state.cpuState.x1.position[1] === y){
+              newXstate = Object.assign({}, this.state.cpuState, {x1: {isCaptured: true}});
+            }
           }
-          if(this.state.cpuState.x1.position[0] === x && this.state.cpuState.x1.position[1] === y){
-            newXstate = Object.assign({}, this.state.cpuState, {x1: {isCaptured: true}});
-          } else if (this.state.cpuState.x2.position[0] === x && this.state.cpuState.x2.position[1] === y){
-            newXstate = Object.assign({}, this.state.cpuState, {x2: {isCaptured: true}});
-          } else if (this.state.cpuState.x3.position[0] === x && this.state.cpuState.x3.position[1] === y){
-            newXstate = Object.assign({}, this.state.cpuState, {x3: {isCaptured: true}});
-          } else if (this.state.cpuState.x4.position[0] === x && this.state.cpuState.x4.position[1] === y){
-            newXstate = Object.assign({}, this.state.cpuState, {x4: {isCaptured: true}});
+          if(!this.state.cpuState.x2.isCaptured){
+            if (this.state.cpuState.x2.position[0] === x && this.state.cpuState.x2.position[1] === y){
+              newXstate = Object.assign({}, this.state.cpuState, {x2: {isCaptured: true}});
+            }
+          }
+          if(!this.state.cpuState.x3.isCaptured){
+            if (this.state.cpuState.x3.position[0] === x && this.state.cpuState.x3.position[1] === y){
+              newXstate = Object.assign({}, this.state.cpuState, {x3: {isCaptured: true}});
+            }
+          }
+          if (!this.state.cpuState.x4.isCaptured){
+            if (this.state.cpuState.x4.position[0] === x && this.state.cpuState.x4.position[1] === y){
+              newXstate = Object.assign({}, this.state.cpuState, {x4: {isCaptured: true}});
+            }
           }
         } else if (squares[x][y] === 'X'){
           newXstate = Object.assign({}, this.state.cpuState, {X: {isCaptured: true}});
+          this.setState({squares: squares});
+          console.log("you won?"); 
+          return;
         }
         if(newXstate){
           await this.setState({cpuState: newXstate});
@@ -186,12 +197,10 @@ class Game extends Component {
         if(squares[x][y] === 'O'){
           this.setState({positionO: [x,y]});
         }
-        //TODO: checkwincondition
-        if(this.state.cpuState.X.isCaptured){
-          this.setState({squares: squares});
-          console.log("you won?"); 
-          return;
-        }
+        //TODO: checkwincondition position 0,2;
+        // if(false){
+         
+        // }
         //if not enough cards shuffle discard into deck;
         if(this.state.deck.length <= 2){
           let tempDiscard = this.state.discard.slice();
@@ -280,9 +289,6 @@ class Game extends Component {
     
     //check if opponent won;
   }
-
-  
-
   //end wrapper for multiple click events
 
   
@@ -525,7 +531,7 @@ function cpuTurn(hand, deck, posO, sqArr) {
   if(!this.state.cpuState.x3.isCaptured) {
     x3move = calculateMoves(this.state.cpuState.x3.position, card1, card1moves, card2, card2moves, false);
   }
-  if(!this.state.cpuState.x3.isCaptured) {
+  if(!this.state.cpuState.x4.isCaptured) {
     x4move = calculateMoves(this.state.cpuState.x4.position, card1, card1moves, card2, card2moves, false);
   }
 
@@ -588,8 +594,6 @@ function cpuTurn(hand, deck, posO, sqArr) {
     function calcMove(aCard, aMove){
       let tempX, tempY;
       const calcMoves = [];
-      console.log('pos: ', pos);
-      console.log('aMove: ', aMove);
       for (let i in aMove){
         tempX = pos[0] + aMove[i][1]; //
         tempY = pos[1] - aMove[i][0]; //
