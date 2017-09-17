@@ -489,7 +489,7 @@ function cpuTurn(hand, deck, posO, sqArr) {
   if(!this.state.cpuState.x3.isCaptured) {
     x3move = calculateMoves(this.state.cpuState.x3.position, card1, card1moves, card2, card2moves, false);
   }
-  if(!this.state.cpuState.x3.isCaptured) {
+  if(!this.state.cpuState.x4.isCaptured) {
     x4move = calculateMoves(this.state.cpuState.x4.position, card1, card1moves, card2, card2moves, false);
   }
 
