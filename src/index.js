@@ -369,7 +369,7 @@ class Board extends Component {
     //TODO: CSS for opponent moves
     if(this.props.theState.cpuMoves.length > 0) {
       if((this.props.theState.cpuMoves[0][0] === x && this.props.theState.cpuMoves[0][1] === y) || (this.props.theState.cpuMoves[1][0] === x && this.props.theState.cpuMoves[1][1] === y)){
-        classSqr = `square cpuMove pointer`;
+        classSqr = `square cpuMove`;
       }
     }
 
