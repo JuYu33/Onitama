@@ -72,6 +72,7 @@ class Game extends Component {
       cardCss: ['card1', 'card2'],
       isCaptured: false,
       cpuMoves: [],
+      difficulty: 'easy',
       cpuState: {
                   x1: {
                         isCaptured: false,
@@ -118,13 +119,11 @@ class Game extends Component {
         if(x){
           await this.setState({cardCss: ["card1 selected-card", "card2"],
                                 p1CardIndex: 0
-
           })
         } else {
           await this.setState({cardCss: ["card1", "card2 selected-card"],
                                 p1CardIndex: 1
           })
-
         }
         if(this.state.pieceIsSelected) {
           const squares = this.state.squares.slice();
@@ -242,7 +241,7 @@ class Game extends Component {
           });
         }
       } else {
-        //TODO: Should selected become deselected on other click
+        //TODO: Should selected become deselected on other click?
         // this.setState({selected: '',
         //                 pieceIsSelected: false
         // });
@@ -253,11 +252,13 @@ class Game extends Component {
 
       if(isCpuTurn && !this.state.winner){
       //TODO: find out why this is creating new pieces with random moves
-        let cpu = cpuTurn.call(this, "player2Cards", this.state.positionO, squares);
-        let xXs = ['X', 'x1', 'x2', 'x3', 'x4'];
-        let originalPosition = cpu[1];
-        let cpuCardName = cpu[2];
-        let newPosition = cpu[3];
+        let oppCard1 = this.state.cards[this.state.player1Cards[0]],
+            oppCard2 = this.state.cards[this.state.player1Cards[1]];
+        const cpu = cpuTurn.call(this, "player2Cards", this.state.positionO, squares, oppCard1, oppCard2, this.state.difficulty);
+        const xXs = ['X', 'x1', 'x2', 'x3', 'x4'];
+        const originalPosition = cpu[1],
+              cpuCardName = cpu[2],
+              newPosition = cpu[3];
         for (let i in xXs) {
           if (this.state.cpuState[xXs[i]].position === originalPosition){
             const newXstate = Object.assign({}, this.state.cpuState, {[xXs[i]]: {isCaptured: false, position: newPosition}});
@@ -329,9 +330,6 @@ class Game extends Component {
 
 
 
-
-
-
 */
 // ==============================================================================================
 
@@ -373,7 +371,7 @@ class Board extends Component {
       }
     }
 
-    //TODO: If game over
+    //TODO: If game over display winning move
     /*
     if(this.props.theState.winner){
       console.log(x,y);
@@ -474,9 +472,6 @@ class Board extends Component {
 
 
 
-
-
-
 */
 // ==============================================================================================
 
@@ -519,12 +514,18 @@ ReactDOM.render(
 
 // ==============================================================================================
 /*
+TODO: Currenty X doesn't move unless in danger, not even to captuer a 'o'. 
+
+Check if X is in danger.
+If in danger move X.
+  Check if new position is in danger.
+  if new position in danger, repeat until new move is found
+    if no good moves found. randomize move of X
 
 
 
-
-
-
+Can push Xmove to random moves as long as no danger is present. 
+so check for danger. within the move options.
 
 
 
@@ -532,69 +533,59 @@ ReactDOM.render(
 // ==============================================================================================
 
 
-function cpuTurn(hand, posO, sqArr) {
-  let winningMoveFound = false;
-  let card1 = this.state[hand][0];
-  let card2 = this.state[hand][1];
-  let card1moves = this.state.cards[this.state[hand][0]];
-  let card2moves = this.state.cards[this.state[hand][1]];
-  const arrayOfAvailableMoves = []; //store best moves here? 
-  
-  let x1move = [];
-  let x2move = [];
-  let x3move = [];
-  let x4move = [];
-  //Need to account for if x1-x4 is captured or not
+function cpuTurn(hand, posO, sqArr, oppCard1, oppCard2, difficulty) {
+  let winningMoveFound = false,
+      card1 = this.state[hand][0],
+      card2 = this.state[hand][1],
+      card1moves = this.state.cards[this.state[hand][0]],
+      card2moves = this.state.cards[this.state[hand][1]];
+  const arrayOfAvailableMoves = [],
+        x1move = [],
+        x2move = [],
+        x3move = [],
+        x4move = [];
 
   //if available: calculateMoves
+  //TODO: concat this all into one loop for all 4;
   let Xmove = calculateMoves(this.state.cpuState.X.position, card1, card1moves, card2, card2moves, true);
   if(Xmove[0] === ('WON' || 'DANGER' || 'O')){
     return Xmove;
   }
   if(!this.state.cpuState.x1.isCaptured){
     x1move = calculateMoves(this.state.cpuState.x1.position, card1, card1moves, card2, card2moves, false);
-    //TODO: concat this all into one loop for all 4;
+
     if(x1move[0] === ('O')){
-    // if(x1move[0] === ('O' || 'o')){
       return x1move;
+    } else {
+      arrayOfAvailableMoves.push(x1move);      
     }
   }
   if(!this.state.cpuState.x2.isCaptured) {
     x2move = calculateMoves(this.state.cpuState.x2.position, card1, card1moves, card2, card2moves, false);
     if(x2move[0] === ('O')){
-    // if(x2move[0] === ('O' || 'o')){
       return x2move;
+    } else {
+      arrayOfAvailableMoves.push(x2move);
     }
   }
   if(!this.state.cpuState.x3.isCaptured) {
     x3move = calculateMoves(this.state.cpuState.x3.position, card1, card1moves, card2, card2moves, false);
     if(x3move[0] === ('O')){
-    // if(x3move[0] === ('O' || 'o')){
       return x3move;
+    } else {
+      arrayOfAvailableMoves.push(x3move);
     }
   }
   if(!this.state.cpuState.x4.isCaptured) {
     x4move = calculateMoves(this.state.cpuState.x4.position, card1, card1moves, card2, card2moves, false);
     if(x4move[0] === ('O')){
-    // if(x4move[0] === ('O' || 'o')){
       return x4move;
+    } else {
+      arrayOfAvailableMoves.push(x4move);
     }
   }
 
-  if(x1move.length > 0){
-    arrayOfAvailableMoves.push(x1move);
-  }
-  if(x2move.length > 0){
-    arrayOfAvailableMoves.push(x2move);
-  }
-  if(x3move.length > 0){
-    arrayOfAvailableMoves.push(x3move);
-  }
-  if(x4move.length > 0){
-    arrayOfAvailableMoves.push(x4move);
-  }
-
-  //if capturing use immediately
+  //create array of capturing moves;
   const oCaptureMove = [];
   for(let i in arrayOfAvailableMoves){
     if (arrayOfAvailableMoves[i][0] === 'o'){
@@ -602,7 +593,7 @@ function cpuTurn(hand, posO, sqArr) {
     }
   }
 
-  //not capturing O so check for lil o. otherwise perform random if there are other pieces
+  //not capturing 'O' so check for 'o'. Else perform random move
   if(oCaptureMove.length > 0 ){
     return oCaptureMove[Math.floor(Math.random() * oCaptureMove.length)];
   } else if (arrayOfAvailableMoves.length === 0){
@@ -611,16 +602,17 @@ function cpuTurn(hand, posO, sqArr) {
     return arrayOfAvailableMoves[Math.floor(Math.random() * arrayOfAvailableMoves.length)];
   }
 
-  function calculateMoves(pos, card1, move1, card2, move2, isX) { 
+  function calculateMoves(pos, card1, move1, card2, move2, isX) {
+
 
     let aMove = calcMove(card1, move1);
     let bMove = calcMove(card2, move2);
 
     if(aMove.length < 2 && bMove.length < 2){
       return [];
-    } else if ((aMove.length < 2 && bMove.length > 2) || bMove[0] === ('O' || 'o' || 'WON' || 'DANGER')) {
+    } else if ((aMove.length < 2 && bMove.length > 2) || bMove[0] === ('O' || 'o' || 'WON')) {
       return bMove;
-    } else if ((bMove.length < 2 && aMove.length > 2) || aMove[0] === ('O' || 'o' || 'WON' || 'DANGER')){
+    } else if ((bMove.length < 2 && aMove.length > 2) || aMove[0] === ('O' || 'o' || 'WON')){
       return aMove;
     } else {
       return Math.random() > 0.49 ? aMove : bMove;
@@ -634,16 +626,10 @@ function cpuTurn(hand, posO, sqArr) {
         tempY = pos[1] - aMove[i][0]; //
 
         //Checks if Master moves to gate.
-        //TODO: make more elaborate and calculate 2 moves ahead.
-        //TODO: make defensive play to prevent capture.
         if(isX){
           if(tempX === 4 && tempY === 2) {
             return ['WON', pos, aCard, [tempX, tempY]];
           }
-          //TODO: DANGER
-          //use getValidSquares fct
-
-
         }
 
         if (tempX > 4 || tempX < 0 || tempY > 4 || tempY < 0){
@@ -655,11 +641,12 @@ function cpuTurn(hand, posO, sqArr) {
             } else if (/o/.test(sqArr[tempX][tempY])){
               calcMoves.push(['o', pos, aCard, [tempX,tempY]]);
             } else {
-              calcMoves.push(['open', pos, aCard, [tempX,tempY]]);
+              calcMoves.push(['empty', pos, aCard, [tempX,tempY]]);
             }
           }
         }
       }
+      //this added step for capturing 'o' comes after checking to see if capturing 'O' is possible
       for (let i in calcMoves){
         if(calcMoves[i][0] === 'o'){
           return calcMoves[i];
@@ -667,8 +654,10 @@ function cpuTurn(hand, posO, sqArr) {
       }
       if(calcMoves.length < 1){
         return [];
+      } else {
+        return calcMoves[Math.floor(Math.random()*calcMoves.length)];  
       }
-      return calcMoves[Math.floor(Math.random()*calcMoves.length)];
+      return [];//just in case but not really needed..
     }
   }
 }
