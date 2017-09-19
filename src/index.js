@@ -158,7 +158,6 @@ class Game extends Component {
           await this.setState({validSquares: tempSqr});  
         }
       } else if (this.state.pieceIsSelected && isValid) { //moving your piece to a valid location
-
         isCpuTurn = true;
         let newXstate = false;
         if(squares[x][y] === 'x'){
@@ -348,6 +347,13 @@ class Board extends Component {
     let classSqr = "square";
     
     //If pieceIsSelected, only show valid move options, otherwise pieces are selectable.
+
+    // if(this.props.theState.cpuMoves.length > 0) {
+    //   if((this.props.theState.cpuMoves[0][0] === x && this.props.theState.cpuMoves[0][1] === y) || (this.props.theState.cpuMoves[1][0] === x && this.props.theState.cpuMoves[1][1] === y)){
+    //     classSqr = `square cpuMove`;
+    //   }
+    // }
+
     if(this.props.theState.pieceIsSelected){
       for (let i = 0; i<this.props.theState.validSquares.length; i++){
         if(this.props.theState.validSquares[i][0] === x && this.props.theState.validSquares[i][1] === y) {
@@ -363,13 +369,16 @@ class Board extends Component {
     if(this.props.theState.selected[0] === x && this.props.theState.selected[1] === y){
       classSqr = `square active pointer`;
     }
-
     //TODO: CSS for opponent moves
     if(this.props.theState.cpuMoves.length > 0) {
       if((this.props.theState.cpuMoves[0][0] === x && this.props.theState.cpuMoves[0][1] === y) || (this.props.theState.cpuMoves[1][0] === x && this.props.theState.cpuMoves[1][1] === y)){
         classSqr = `square cpuMove`;
       }
     }
+
+
+
+
 
     //TODO: If game over display winning move
     /*
@@ -522,10 +531,13 @@ If in danger move X.
   if new position in danger, repeat until new move is found
     if no good moves found. randomize move of X
 
-
+X is not capturing. I think should be fine.
 
 Can push Xmove to random moves as long as no danger is present. 
 so check for danger. within the move options.
+
+x
+not capturing properly
 
 
 
@@ -538,12 +550,12 @@ function cpuTurn(hand, posO, sqArr, oppCard1, oppCard2, difficulty) {
       card1 = this.state[hand][0],
       card2 = this.state[hand][1],
       card1moves = this.state.cards[this.state[hand][0]],
-      card2moves = this.state.cards[this.state[hand][1]];
-  const arrayOfAvailableMoves = [],
-        x1move = [],
-        x2move = [],
-        x3move = [],
-        x4move = [];
+      card2moves = this.state.cards[this.state[hand][1]],
+      x1move = [],
+      x2move = [],
+      x3move = [],
+      x4move = [];
+  const arrayOfAvailableMoves = [];
 
   //if available: calculateMoves
   //TODO: concat this all into one loop for all 4;
@@ -553,7 +565,6 @@ function cpuTurn(hand, posO, sqArr, oppCard1, oppCard2, difficulty) {
   }
   if(!this.state.cpuState.x1.isCaptured){
     x1move = calculateMoves(this.state.cpuState.x1.position, card1, card1moves, card2, card2moves, false);
-
     if(x1move[0] === ('O')){
       return x1move;
     } else {
@@ -603,7 +614,6 @@ function cpuTurn(hand, posO, sqArr, oppCard1, oppCard2, difficulty) {
   }
 
   function calculateMoves(pos, card1, move1, card2, move2, isX) {
-
 
     let aMove = calcMove(card1, move1);
     let bMove = calcMove(card2, move2);
