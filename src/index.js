@@ -73,28 +73,51 @@ class Game extends Component {
       isCaptured: false,
       cpuMoves: [],
       difficulty: 'easy',
-      cpuState: {
-                  x1: {
-                        isCaptured: false,
-                        position: [0,0]
-                      },
-                  x2: {
-                        isCaptured: false,
-                        position: [0,1]
-                      },
-                  X:  {
-                        isCaptured: false,
-                        position: [0,2]
-                      },
-                  x3: {
-                        isCaptured: false,
-                        position: [0,3]
-                      },
-                  x4: {
-                        isCaptured: false,
-                        position: [0,4]
-                      }
-                }
+      xState: {
+                x1: {
+                      isCaptured: false,
+                      position: [0,0]
+                    },
+                x2: {
+                      isCaptured: false,
+                      position: [0,1]
+                    },
+                X:  {
+                      isCaptured: false,
+                      position: [0,2]
+                    },
+                x3: {
+                      isCaptured: false,
+                      position: [0,3]
+                    },
+                x4: {
+                      isCaptured: false,
+                      position: [0,4]
+                    }
+                },
+      oState: {
+                o1: {
+                      isCaptured: false,
+                      position: [4,0]
+                    },
+                o2: {
+                      isCaptured: false,
+                      position: [4,1]
+                    },
+                O:  {
+                      isCaptured: false,
+                      position: [4,2]
+                    },
+                o3: {
+                      isCaptured: false,
+                      position: [4,3]
+                    },
+                o4: {
+                      isCaptured: false,
+                      position: [4,4]
+                    },
+      dangerZone: {}
+      }
     };
   }
 
@@ -161,37 +184,37 @@ class Game extends Component {
         isCpuTurn = true;
         let newXstate = false;
         if(squares[x][y] === 'x'){
-          if(!this.state.cpuState.x1.isCaptured){
-            if(this.state.cpuState.x1.position[0] === x && this.state.cpuState.x1.position[1] === y){
-              newXstate = Object.assign({}, this.state.cpuState, {x1: {isCaptured: true}});
+          if(!this.state.xState.x1.isCaptured){
+            if(this.state.xState.x1.position[0] === x && this.state.xState.x1.position[1] === y){
+              newXstate = Object.assign({}, this.state.xState, {x1: {isCaptured: true}});
             }
           }
-          if(!this.state.cpuState.x2.isCaptured){
-            if (this.state.cpuState.x2.position[0] === x && this.state.cpuState.x2.position[1] === y){
-              newXstate = Object.assign({}, this.state.cpuState, {x2: {isCaptured: true}});
+          if(!this.state.xState.x2.isCaptured){
+            if (this.state.xState.x2.position[0] === x && this.state.xState.x2.position[1] === y){
+              newXstate = Object.assign({}, this.state.xState, {x2: {isCaptured: true}});
             }
           }
-          if(!this.state.cpuState.x3.isCaptured){
-            if (this.state.cpuState.x3.position[0] === x && this.state.cpuState.x3.position[1] === y){
-              newXstate = Object.assign({}, this.state.cpuState, {x3: {isCaptured: true}});
+          if(!this.state.xState.x3.isCaptured){
+            if (this.state.xState.x3.position[0] === x && this.state.xState.x3.position[1] === y){
+              newXstate = Object.assign({}, this.state.xState, {x3: {isCaptured: true}});
             }
           }
-          if (!this.state.cpuState.x4.isCaptured){
-            if (this.state.cpuState.x4.position[0] === x && this.state.cpuState.x4.position[1] === y){
-              newXstate = Object.assign({}, this.state.cpuState, {x4: {isCaptured: true}});
+          if (!this.state.xState.x4.isCaptured){
+            if (this.state.xState.x4.position[0] === x && this.state.xState.x4.position[1] === y){
+              newXstate = Object.assign({}, this.state.xState, {x4: {isCaptured: true}});
             }
           }
         } else if (squares[x][y] === 'X'){
-          newXstate = Object.assign({}, this.state.cpuState, {X: {isCaptured: true}});
+          newXstate = Object.assign({}, this.state.xState, {X: {isCaptured: true}});
           console.log("you won?"); 
           await this.setState({winner: 'player1',
                                 validSquares: [x,y],
                                 squares: squares,
-                                cpuState: newXstate
+                                xState: newXstate
           });
         }
         if(newXstate && !this.state.winner){
-          await this.setState({cpuState: newXstate});
+          await this.setState({xState: newXstate});
         }
 
         let tempDeck;
@@ -253,15 +276,15 @@ class Game extends Component {
       //TODO: find out why this is creating new pieces with random moves
         let oppCard1 = this.state.cards[this.state.player1Cards[0]],
             oppCard2 = this.state.cards[this.state.player1Cards[1]];
-        const cpu = cpuTurn.call(this, "player2Cards", this.state.positionO, squares, oppCard1, oppCard2, this.state.difficulty);
+        const cpu = cpuTurn.call(this, "player2Cards", this.state.positionO, squares, oppCard1, oppCard2, this.state.oState, this.state.difficulty);
         const xXs = ['X', 'x1', 'x2', 'x3', 'x4'];
         const originalPosition = cpu[1],
               cpuCardName = cpu[2],
               newPosition = cpu[3];
         for (let i in xXs) {
-          if (this.state.cpuState[xXs[i]].position === originalPosition){
-            const newXstate = Object.assign({}, this.state.cpuState, {[xXs[i]]: {isCaptured: false, position: newPosition}});
-            await this.setState({cpuState: newXstate});
+          if (this.state.xState[xXs[i]].position === originalPosition){
+            const newXstate = Object.assign({}, this.state.xState, {[xXs[i]]: {isCaptured: false, position: newPosition}});
+            await this.setState({xState: newXstate});
           }
         }
 
@@ -545,7 +568,7 @@ not capturing properly
 // ==============================================================================================
 
 
-function cpuTurn(hand, posO, sqArr, oppCard1, oppCard2, difficulty) {
+function cpuTurn(hand, posO, sqArr, oppCard1, oppCard2, oState, difficulty) {
   let winningMoveFound = false,
       card1 = this.state[hand][0],
       card2 = this.state[hand][1],
@@ -557,38 +580,42 @@ function cpuTurn(hand, posO, sqArr, oppCard1, oppCard2, difficulty) {
       x4move = [];
   const arrayOfAvailableMoves = [];
 
+  //Calcuate array of danger moves here with getValidSquares
+  
+  
+
   //if available: calculateMoves
   //TODO: concat this all into one loop for all 4;
-  let Xmove = calculateMoves(this.state.cpuState.X.position, card1, card1moves, card2, card2moves, true);
+  let Xmove = calculateMoves(this.state.xState.X.position, card1, card1moves, card2, card2moves, true);
   if(Xmove[0] === ('WON' || 'DANGER' || 'O')){
     return Xmove;
   }
-  if(!this.state.cpuState.x1.isCaptured){
-    x1move = calculateMoves(this.state.cpuState.x1.position, card1, card1moves, card2, card2moves, false);
+  if(!this.state.xState.x1.isCaptured){
+    x1move = calculateMoves(this.state.xState.x1.position, card1, card1moves, card2, card2moves, false);
     if(x1move[0] === ('O')){
       return x1move;
     } else {
       arrayOfAvailableMoves.push(x1move);      
     }
   }
-  if(!this.state.cpuState.x2.isCaptured) {
-    x2move = calculateMoves(this.state.cpuState.x2.position, card1, card1moves, card2, card2moves, false);
+  if(!this.state.xState.x2.isCaptured) {
+    x2move = calculateMoves(this.state.xState.x2.position, card1, card1moves, card2, card2moves, false);
     if(x2move[0] === ('O')){
       return x2move;
     } else {
       arrayOfAvailableMoves.push(x2move);
     }
   }
-  if(!this.state.cpuState.x3.isCaptured) {
-    x3move = calculateMoves(this.state.cpuState.x3.position, card1, card1moves, card2, card2moves, false);
+  if(!this.state.xState.x3.isCaptured) {
+    x3move = calculateMoves(this.state.xState.x3.position, card1, card1moves, card2, card2moves, false);
     if(x3move[0] === ('O')){
       return x3move;
     } else {
       arrayOfAvailableMoves.push(x3move);
     }
   }
-  if(!this.state.cpuState.x4.isCaptured) {
-    x4move = calculateMoves(this.state.cpuState.x4.position, card1, card1moves, card2, card2moves, false);
+  if(!this.state.xState.x4.isCaptured) {
+    x4move = calculateMoves(this.state.xState.x4.position, card1, card1moves, card2, card2moves, false);
     if(x4move[0] === ('O')){
       return x4move;
     } else {
@@ -618,37 +645,53 @@ function cpuTurn(hand, posO, sqArr, oppCard1, oppCard2, difficulty) {
     let aMove = calcMove(card1, move1);
     let bMove = calcMove(card2, move2);
 
-    if(aMove.length < 2 && bMove.length < 2){
-      return [];
-    } else if ((aMove.length < 2 && bMove.length > 2) || bMove[0] === ('O' || 'o' || 'WON')) {
+    if ((aMove.length < 2 && bMove.length > 2) || bMove[0] === ('O' || 'o' || 'WON')) {
       return bMove;
     } else if ((bMove.length < 2 && aMove.length > 2) || aMove[0] === ('O' || 'o' || 'WON')){
       return aMove;
+    } else if(aMove.length < 2 && bMove.length < 2) {
+      return [];
     } else {
       return Math.random() > 0.49 ? aMove : bMove;
     }
 
     function calcMove(aCard, aMove){
-      let tempX, tempY;
+      let tempX, tempY, oDangerX, oDangerY;
       const calcMoves = [];
       for (let i in aMove){
         tempX = pos[0] + aMove[i][1]; //
         tempY = pos[1] - aMove[i][0]; //
 
         //Checks if Master moves to gate.
-        if(isX){
-          if(tempX === 4 && tempY === 2) {
+
+        /*
+        elephant: [[-1,1],[-1,0],[1,1],[1,0]],
+        frog: [[-2,0], [-1,1], [1,-1]],
+        */
+        if (isX) {
+          if (tempX === 4 && tempY === 2) {
             return ['WON', pos, aCard, [tempX, tempY]];
+          } else {
+
+            //Abstact to another function?
+            //Find array of danger zones first
+            oDangerX = pos[0] + aMove[i][1];// actually Y-axis
+            oDangerY = pos[1] - aMove[i][0];// actually X-axis
+
+            if (sqArr[oDangerX][oDangerY] === ('o' || 'O')) {
+              //Danger found calculate move here:
+            }
+
           }
         }
 
-        if (tempX > 4 || tempX < 0 || tempY > 4 || tempY < 0){
+        if (tempX > 4 || tempX < 0 || tempY > 4 || tempY < 0) {
           continue;
         } else {
-          if(!/[xX]/.test(sqArr[tempX][tempY])){            
-            if(/O/.test(sqArr[tempX][tempY])){
+          if (!/[xX]/.test(sqArr[tempX][tempY])) {            
+            if (/O/.test(sqArr[tempX][tempY])) {
               return ['O', pos, aCard, [tempX,tempY]];
-            } else if (/o/.test(sqArr[tempX][tempY])){
+            } else if (/o/.test(sqArr[tempX][tempY])) {
               calcMoves.push(['o', pos, aCard, [tempX,tempY]]);
             } else {
               calcMoves.push(['empty', pos, aCard, [tempX,tempY]]);
@@ -657,12 +700,12 @@ function cpuTurn(hand, posO, sqArr, oppCard1, oppCard2, difficulty) {
         }
       }
       //this added step for capturing 'o' comes after checking to see if capturing 'O' is possible
-      for (let i in calcMoves){
-        if(calcMoves[i][0] === 'o'){
+      for (let i in calcMoves) {
+        if (calcMoves[i][0] === 'o') {
           return calcMoves[i];
         }
       }
-      if(calcMoves.length < 1){
+      if (calcMoves.length < 1) {
         return [];
       } else {
         return calcMoves[Math.floor(Math.random()*calcMoves.length)];  
@@ -673,7 +716,7 @@ function cpuTurn(hand, posO, sqArr, oppCard1, oppCard2, difficulty) {
 }
 
 //Find array of valid moves with given unit & card.
-function getValidSquares(x,y,val,sqArr){
+function getValidSquares(x,y,val,sqArr) {
   const validSquares = [];
   let tempX, tempY;
 
@@ -681,10 +724,10 @@ function getValidSquares(x,y,val,sqArr){
     tempX = x - val[i][1];
     tempY = y + val[i][0];
     
-    if (tempX > 4 || tempX < 0 || tempY > 4 || tempY < 0){
+    if (tempX > 4 || tempX < 0 || tempY > 4 || tempY < 0 ){
       continue;
     } else {
-      if((sqArr[tempX][tempY]) !== sqArr[x][y]){
+      if ((sqArr[tempX][tempY]) !== sqArr[x][y]) {
       // if(!regexO.test(sqArr[tempX][tempY])){
         validSquares.push([tempX,tempY]);
       }
