@@ -23,7 +23,7 @@ const ox = require('./img/ox.png');
 const cobra = require('./img/cobra.png');
 const regexO = /[oO]/;
 const xXs = ['x1', 'x2', 'x3', 'x4'];
-const oOs = ['o1', 'o2', 'o3', 'o4'];
+const oOs = ['O', 'o1', 'o2', 'o3', 'o4'];
 
 
 /*
@@ -47,26 +47,25 @@ class Game extends Component {
                 ['','','','',''],  
                 ['','','','',''],
                 ['o','o','O','o','o']],
-      positionO: [4,2],
       cards:  {
-                tiger: [[0,2], [0,-1]],
-                crab: [[-2,0], [0,1], [2,0]],
-                monkey: [[-1,1], [1,1], [-1,-1], [1,-1]],
-                crane: [[0,1], [-1,-1], [1,-1]],
-                dragon: [[-2,1],[-1,-1],[1,-1],[2,1]],
-                elephant: [[-1,1],[-1,0],[1,1],[1,0]],
-                mantis: [[-1,1],[0,-1],[1,1]],
-                boar: [[-1,0],[0,1],[1,0]],
-                frog: [[-2,0], [-1,1], [1,-1]],
-                goose: [[-1,1], [-1,0], [1,0], [1,-1]],
-                horse: [[-1,0], [0,1], [0,-1]],
-                eel: [[-1,1], [-1,-1], [1,0]],
-                rabbit: [[-1,-1], [1,1], [2,0]],
-                rooster: [[-1,-1], [-1,0], [1,0], [1,1]],
-                ox: [[0,1], [0,-1], [1,0]],
-                cobra: [[-1,0], [1,1], [1,-1]]
+                Tiger: [[0,2], [0,-1]],
+                Crab: [[-2,0], [0,1], [2,0]],
+                Monkey: [[-1,1], [1,1], [-1,-1], [1,-1]],
+                Crane: [[0,1], [-1,-1], [1,-1]],
+                Dragon: [[-2,1],[-1,-1],[1,-1],[2,1]],
+                Elephant: [[-1,1],[-1,0],[1,1],[1,0]],
+                Mantis: [[-1,1],[0,-1],[1,1]],
+                Boar: [[-1,0],[0,1],[1,0]],
+                Frog: [[-2,0], [-1,1], [1,-1]],
+                Goose: [[-1,1], [-1,0], [1,0], [1,-1]],
+                Horse: [[-1,0], [0,1], [0,-1]],
+                Eel: [[-1,1], [-1,-1], [1,0]],
+                Rabbit: [[-1,-1], [1,1], [2,0]],
+                Rooster: [[-1,-1], [-1,0], [1,0], [1,1]],
+                Ox: [[0,1], [0,-1], [1,0]],
+                Cobra: [[-1,0], [1,1], [1,-1]]
               },
-      deck: ['tiger', 'crab', 'monkey', 'crane', 'dragon', 'elephant', 'mantis', 'boar', 'frog', 'goose', 'horse', 'eel', 'rabbit', 'rooster', 'ox', 'cobra'],
+      deck: ['Tiger', 'Crab', 'Monkey', 'Crane', 'Dragon', 'Elephant', 'Mantis', 'Boar', 'Frog', 'Goose', 'Horse', 'Eel', 'Rabbit', 'Rooster', 'Ox', 'Cobra'],
       discard: [],
       selected: '',
       pieceIsSelected: false,
@@ -79,7 +78,7 @@ class Game extends Component {
       cardCss: ['card1', 'card2'],
       isCaptured: false,
       cpuMoves: [],
-      difficulty: 'easy',
+      difficulty: 'hard',
       xState: {
                 x1: {
                       isCaptured: false,
@@ -143,26 +142,14 @@ class Game extends Component {
   }
 
   async handleClick(type,x,y) {
-    console.log(this.state.discard);
     //TODO: End the game if a winner is found. Currently just ends
-    let selectCard,selectIndex;
     if (this.state.winner) {
       return;
     } else if (type === 'card') { //Highlights the clicked card
-        if(x){
-          selectCard = ["card1 selected-card", "card2"];
-          selectIndex = 0;
-          // await this.setState({cardCss: ["card1 selected-card", "card2"],
-          //                       p1CardIndex: 0
-          // })
-        } else {
-          selectCard = ["card1", "card2 selected-card"];
-          selectIndex = 1;
-          // await this.setState({cardCss: ["card1", "card2 selected-card"],
-          //                       p1CardIndex: 1
-          // })
-        }
-        let tempSqr = [];
+        let selectCard = x ? ["card1 selected-card", "card2"] : ["card1", "card2 selected-card"],
+            selectIndex = x ? 0 : 1,
+            tempSqr = [];
+
         if(this.state.pieceIsSelected) {
           const squares = this.state.squares.slice();
           let cardName = this.state.player1Cards[selectIndex];
@@ -174,9 +161,9 @@ class Game extends Component {
                               p1CardIndex: selectIndex
         });  
     } else if (type ==='square') {
-      let isCpuTurn = false;
-      const squares = this.state.squares.slice();
-      let isValid = false;
+      let isCpuTurn = false,
+          isValid = false,
+          squares = this.state.squares.slice();
 
       //check if the clicked square is valid move from selected position
       for (let i = 0; i<this.state.validSquares.length; i++) {
@@ -185,17 +172,17 @@ class Game extends Component {
         }
       }
       //if is oO & nothing selected, get valid squares
-      if(regexO.test(squares[x][y]) && (!this.state.pieceIsSelected || regexO.test(squares[x][y]))) { //clicked your own piece when nothing was clicked before
-        await this.setState({selected: [x,y],
-                              pieceIsSelected: true
-        });
-
+      //if(regexO.test(squares[x][y]) && (!this.state.pieceIsSelected || regexO.test(squares[x][y]))) { //clicked your own piece when nothing was clicked before
+      if(regexO.test(squares[x][y])) {
         if(this.state.p1CardIndex >= 0){
-          let cardName = this.state.player1Cards[this.state.p1CardIndex];
-          let cardArr = this.state.cards[cardName];
-          const tempSqr = getValidSquares(this.state.selected[0],this.state.selected[1],cardArr,squares);
+          let cardName = this.state.player1Cards[this.state.p1CardIndex],
+              cardArr = this.state.cards[cardName];
+          const tempSqr = getValidSquares(x,y,cardArr,squares);
           
-          await this.setState({validSquares: tempSqr});  
+          await this.setState({validSquares: tempSqr,
+                                selected: [x,y],
+                                pieceIsSelected: true
+          });  
         }
       } else if (this.state.pieceIsSelected && isValid) { //moving your piece to a valid location
         isCpuTurn = true;
@@ -210,8 +197,11 @@ class Game extends Component {
             }
           }
 
-          //TODO: create function moveToSqr for move and capture of a piece
+          //TODO: can rework this to xXs include 'X'
+          if(newXstate.X.isCaptured === true){
 
+          }
+          //TODO: create function moveToSqr for move and capture of a piece
 
         } else if (squares[x][y] === 'X'){
           newXstate.X.isCaptured = true;
@@ -233,10 +223,20 @@ class Game extends Component {
         let prevY = this.state.selected[1];
         squares[x][y] = squares[prevX][prevY] === 'O' ? 'O':'o';
         squares[prevX][prevY] = '';
+
+        let newOstate = Object.assign({}, this.state.oState); 
+
+        for (let i=0; i<oOs.length; i++){
+          if(newOstate[oOs[i]].position[0] === prevX && newOstate[oOs[i]].position[1] === prevY){
+            newOstate[oOs[i]].position = [x,y];
+          }
+        }
+
         await this.setState({selected: '',
                               pieceIsSelected: false,
                               validSquares: '',
-                              xState: newXstate
+                              xState: newXstate,
+                              oState: newOstate
         });
         //TODO: checkwincondition position 0,2;
         // if(false){
@@ -244,17 +244,17 @@ class Game extends Component {
         // }
         //if not enough cards shuffle discard into deck;
         if(!this.state.winner) {
+          let discard;
           let tempDiscard = this.state.discard.slice();
-          let tempDeck = this.state.deck.slice();
+          tempDeck = this.state.deck.slice();
           if(this.state.deck.length <= 2){
             tempDiscard = shuffleDeck(tempDiscard);
             tempDeck = tempDeck.concat(tempDiscard);
             tempDiscard = [];
           }
           //put used card in discard
-          let discard = this.state.player1Cards[this.state.p1CardIndex];
+          discard = this.state.player1Cards[this.state.p1CardIndex];
           tempDiscard.push(discard);
-          // tempDeck = this.state.deck.slice();
           //update card used and deck & update next card
           //this sets 1 of the 2 cards = ''
           let tempHand = this.state.player1Cards;
@@ -269,25 +269,81 @@ class Game extends Component {
         }
       } else {
         //TODO: Should selected become deselected on other click?
+        //      Deselected on right click!!!
         // this.setState({selected: '',
         //                 pieceIsSelected: false
         // });
 
       }
-      // TODO: UNDO?
-      // X move generates another move
-      // await this.setState({squares: squares});
+
+      // TODO: UNDO?!
 
       if(isCpuTurn && !this.state.winner){
+        const newXstate = Object.assign({}, this.state.xState),
+              newOstate = Object.assign({}, this.state.oState),
+              cardMoves1 = this.state.cards[this.state.player1Cards[0]],
+              cardMoves2 = this.state.cards[this.state.player1Cards[1]];
         let oppCard1 = this.state.cards[this.state.player1Cards[0]],
-            oppCard2 = this.state.cards[this.state.player1Cards[1]];
-        const cpu = cpuTurn.call(this, "player2Cards", this.state.positionO, squares, oppCard1, oppCard2, this.state.oState, this.state.difficulty);
-        const newXstate = Object.assign({}, this.state.xState);
-        const originalPosition = cpu[1],
-              cpuCardName = cpu[2],
+            oppCard2 = this.state.cards[this.state.player1Cards[1]],
+            deckCopy = this.state.deck.slice(),
+            tempDiscard = this.state.discard.slice(),
+            tempDeck = this.state.deck.slice(),
+            dangerZones = {},
+            nextCard, handCopy, tempSqr1, tempSqr2;
+
+        //before calling cpuTurn, find the danger zones.
+        if(this.state.difficulty === 'hard'){
+          for(let i=0; i<oOs.length; i++){
+            if(!newOstate[oOs[i]].isCaptured){
+              tempSqr1 = getValidSquares(newOstate[oOs[i]].position[0], newOstate[oOs[i]].position[1], cardMoves1, squares);
+              tempSqr2 = getValidSquares(newOstate[oOs[i]].position[0], newOstate[oOs[i]].position[1], cardMoves2, squares);
+              
+              //The following only registers danger zones for 'X'
+              /*
+              tempSqr1.forEach((myArr)=>{
+                if(squares[myArr[0]][myArr[1]] === 'X'){
+                  dangerZones[myArr] = [newOstate[oOs[i]].position[0]];
+                }
+              });
+
+              tempSqr2.forEach((myArr)=>{
+                if(squares[myArr[0]][myArr[1]] === 'X'){
+                  dangerZones[myArr] = newOstate[oOs[i]].position[0];
+                }
+              });
+              */
+
+              //The following is all moves that 'o' and 'O' can do
+              tempSqr1.forEach((myArr)=>{
+                if(!dangerZones.hasOwnProperty(myArr)){
+                  dangerZones[myArr] = [newOstate[oOs[i]].position[0]];
+                } else {
+                  dangerZones[myArr].push(newOstate[oOs[i]].position[0]);
+                }
+              });
+
+              tempSqr2.forEach((myArr)=>{
+                if(!dangerZones.hasOwnProperty(myArr)){
+                  dangerZones[myArr] = [newOstate[oOs[i]].position[0]];
+                } else {
+                  dangerZones[myArr].push(newOstate[oOs[i]].position[0]);
+                }
+              });
+
+            }
+          }
+        }
+
+        console.log(dangerZones);
+        
+
+        const cpu = cpuTurn.call(this, "player2Cards", dangerZones, squares, oppCard1, oppCard2, this.state.oState, this.state.difficulty);
+        const squareContents = cpu[0],
+              originalPosition = cpu[1],
+              cpuUsedCard = cpu[2],
               newPosition = cpu[3];
         for (let i in xXs) {
-          //lazy soluition
+          //lazy soluition because it checks for 'X' position for each of the xXs. So 4 times max. Not a huge task
           if (originalPosition === this.state.xState.X.position){
             newXstate.X.position = newPosition;
             break;
@@ -296,18 +352,31 @@ class Game extends Component {
           }
         }
 
-        let deckCopy = this.state.deck.slice();
-        //shuffle discard
-        if(deckCopy.length <= 2){
-          let tempDiscard = this.state.discard.slice();
-          const tempDeck = this.state.deck.slice();
-          tempDiscard = shuffleDeck(tempDiscard);
-          deckCopy = tempDeck.concat(tempDiscard);
+        //if Captured 'o' or 'O'
+        if(regexO.test(squareContents)){
+          for(let i=0; i<oOs.length; i++){
+            if(newOstate[oOs[i]].position[0] === newPosition[0] && newOstate[oOs[i]].position[1] === newPosition[1]){
+              newOstate[oOs[i]].position = [];
+              newOstate[oOs[i]].isCaptured = true;
+
+              if(oOs[i] === 'O'){
+                //cpuWon
+              }
+              break;
+            }
+          }
         }
 
-        const nextCard = deckCopy.splice(1,1);
-        const handCopy = this.state.player2Cards.slice();
-        if(handCopy[0] === cpuCardName){
+        //shuffle discard
+        if(deckCopy.length <= 2){
+          tempDiscard = shuffleDeck(tempDiscard);
+          deckCopy = tempDeck.concat(tempDiscard);
+          tempDiscard = [];
+        }
+
+        nextCard = deckCopy.splice(1,1);
+        handCopy = this.state.player2Cards.slice();
+        if(handCopy[0] === cpuUsedCard){
           handCopy[0] = nextCard[0];
         } else {
           handCopy[1] = nextCard[0];
@@ -315,17 +384,16 @@ class Game extends Component {
 
         squares[newPosition[0]][newPosition[1]] = squares[originalPosition[0]][originalPosition[1]] === 'X' ? 'X' : 'x';
         squares[originalPosition[0]][originalPosition[1]] = '';
+        tempDiscard.push(cpuUsedCard);
 
-        let usedCard = this.state.discard.slice();
-        usedCard.push(cpuCardName);
-
-        this.setState({discard: usedCard,
+        this.setState({discard: tempDiscard,
                         cpuMoves: [[newPosition[0], newPosition[1]], [originalPosition[0], originalPosition[1]]],
                         player2Cards: handCopy,
                         deck: deckCopy,
-                        p2LastUsed: cpuCardName,
+                        p2LastUsed: cpuUsedCard,
                         squares: squares,
-                        xState: newXstate
+                        xState: newXstate,
+                        oState: newOstate
         });
       }
     }
@@ -429,7 +497,7 @@ class Board extends Component {
 
     let lastUsedHeader = this.props.theState.p2LastUsed.length > 0 ? <h2 className="lastUsedHeader">Opponent Last Used: </h2> : null;
     let lastUsed = this.props.theState.p2LastUsed.length > 0 ? <Card className="last-card upside-down" card={this.props.theState.p2LastUsed} src={p2lastcard}/> : null;
-    let selectCardPrompt = this.props.theState.p1CardIndex >= 0 ? null : <h2 className="highlight">Please select one of your cards cards below</h2>;
+    let selectCardPrompt = this.props.theState.p1CardIndex >= 0 ? null : <h2 className="highlight">Please select one of your cards cards below to BEGIN!</h2>;
     if(this.props.theState.winner){
       selectCardPrompt = <h1>{this.props.theState.winner} has won!!</h1>
     }
@@ -545,25 +613,22 @@ Functions
 
 TODO: Currenty X doesn't move unless in danger, not even to captuer a 'o'. 
 
-//Calcuate array of danger moves here with getValidSquares
+//Update which card is the new card / what card did cpu just draw
 
 
 ==============================================================================================
 */
 
-function cpuTurn(hand, posO, sqArr, oppCard1, oppCard2, oState, difficulty) {
-  let winningMoveFound = false,
-      card1 = this.state[hand][0],
+function cpuTurn(hand, dangerZones, sqArr, oppCard1, oppCard2, oState, difficulty) {
+  let card1 = this.state[hand][0],
       card2 = this.state[hand][1],
       card1moves = this.state.cards[this.state[hand][0]],
       card2moves = this.state.cards[this.state[hand][1]],
-      x1move = [],
-      x2move = [],
-      x3move = [],
-      x4move = [];
+      x1move = [];
   const arrayOfAvailableMoves = [],
         oCaptureMove = [];
 
+  //TODO bring 'X' into xXs
   for (let i=0; i<xXs.length; i++){
     if(!this.state.xState[xXs[i]].isCaptured){
       x1move = calculateMoves(this.state.xState[xXs[i]].position, card1, card1moves, card2, card2moves, false);
@@ -628,18 +693,13 @@ function cpuTurn(hand, posO, sqArr, oppCard1, oppCard2, oState, difficulty) {
         if (isX) {
           if (tempX === 4 && tempY === 2) {
             return ['WON', pos, aCard, [tempX, tempY]];
-          } else {
-
-            //Abstact to another function?
-            //Find array of danger zones first
-            oDangerX = pos[0] + aMove[i][1];// actually Y-axis
+          } else if (difficulty === 'hard') {
+            //why am I using aMove, that doesn't make sense. This is just tempX.
+            //Need to implement oppCard1 & oppCard2
+            oDangerX = pos[0] + aMove[i][1];// actually Y-axis 
             oDangerY = pos[1] - aMove[i][0];// actually X-axis
-            if (oDangerX > 4 || oDangerX < 0 || oDangerY > 4 || oDangerY < 0) {
-              continue;
-            } else {
-              if (sqArr[oDangerX][oDangerY] === 'o' || sqArr[oDangerX][oDangerY] === 'O') {
-                //Danger found calculate move here:
-              }
+            if(dangerZones.hasOwnProperty([oDangerX,oDangerY])){
+              //'X' is capturable here. Find array of moves for 'X' or capture the piece that can capture it.
             }
           }
         }
@@ -720,37 +780,37 @@ function shuffleDeck(deck) {
 }
 
 function findConstCard(card) {
-  if(card === 'tiger'){
+  if(card === 'Tiger'){
     return tiger;
-  } else if (card === 'monkey'){
+  } else if (card === 'Monkey'){
     return monkey;
-  } else if (card === 'crab'){
+  } else if (card === 'Crab'){
     return crab;
-  } else if (card === 'crane'){
+  } else if (card === 'Crane'){
     return crane;
-  } else if (card === 'dragon'){
+  } else if (card === 'Dragon'){
     return dragon;
-  } else if (card === 'elephant'){
+  } else if (card === 'Elephant'){
     return elephant;
-  } else if (card === 'mantis'){
+  } else if (card === 'Mantis'){
     return mantis;
-  } else if (card === 'boar'){
+  } else if (card === 'Boar'){
     return boar;
-  } else if (card === 'frog'){
+  } else if (card === 'Frog'){
     return frog;
-  } else if (card === 'goose'){
+  } else if (card === 'Goose'){
     return goose;
-  } else if (card === 'horse'){
+  } else if (card === 'Horse'){
     return horse;
-  } else if (card === 'eel'){
+  } else if (card === 'Eel'){
     return eel;
-  } else if (card === 'rabbit'){
+  } else if (card === 'Rabbit'){
     return rabbit;
-  } else if (card === 'rooster'){
+  } else if (card === 'Rooster'){
     return rooster;
-  } else if (card === 'ox'){
+  } else if (card === 'Ox'){
     return ox;
-  } else if (card === 'cobra'){
+  } else if (card === 'Cobra'){
     return cobra
   }
   return null;
