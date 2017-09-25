@@ -625,6 +625,7 @@ function cpuTurn(hand, dangerZones, sqArr, oppCard1, oppCard2, oState, difficult
       card1moves = this.state.cards[this.state[hand][0]],
       card2moves = this.state.cards[this.state[hand][1]],
       x1move = [];
+      priority = {};
   const arrayOfAvailableMoves = [],
         oCaptureMove = [];
 
@@ -677,7 +678,7 @@ function cpuTurn(hand, dangerZones, sqArr, oppCard1, oppCard2, oState, difficult
       return Math.random() > 0.49 ? aMove : bMove;
     }
 
-    function calcMove(aCard, aMove){
+    function calcMove(aCard, aMove) {
       let tempX, tempY, oDangerX, oDangerY;
       const calcMoves = [];
       for (let i = 0; i < aMove.length; i++){
@@ -686,20 +687,23 @@ function cpuTurn(hand, dangerZones, sqArr, oppCard1, oppCard2, oState, difficult
 
         //Checks if Master moves to gate.
 
-        /*
-        elephant: [[-1,1],[-1,0],[1,1],[1,0]],
-        frog: [[-2,0], [-1,1], [1,-1]],
-        */
-        if (isX) {
-          if (tempX === 4 && tempY === 2) {
-            return ['WON', pos, aCard, [tempX, tempY]];
-          } else if (difficulty === 'hard') {
-            //why am I using aMove, that doesn't make sense. This is just tempX.
-            //Need to implement oppCard1 & oppCard2
-            oDangerX = pos[0] + aMove[i][1];// actually Y-axis 
-            oDangerY = pos[1] - aMove[i][0];// actually X-axis
-            if(dangerZones.hasOwnProperty([oDangerX,oDangerY])){
-              //'X' is capturable here. Find array of moves for 'X' or capture the piece that can capture it.
+        if (isX && difficulty === "hard") {
+
+          //This is just aMove => tempX.
+          //Need to implement oppCard1 & oppCard2
+          // oDangerX = pos[0] + aMove[i][1];// actually Y-axis 
+          // oDangerY = pos[1] - aMove[i][0];// actually X-axis
+          if (dangerZones.hasOwnProperty([pos[0],pos[1]])) {
+            //'X' is capturable here. Find array of moves for 'X' or capture the piece that can capture it.
+
+            if (!dangerZones.hasOwnProperty([tempX, tempY])) {
+              return ['DANGER', pos, aCard, [tempX,tempY]];
+            } else {
+              //NowDo
+              if (!priority.hasOwnProperty([tempX, tempY])) {
+                priority[tempX,tempY] = dangerZones[[tempX, tempY]];
+              }
+              continue;
             }
           }
         }
@@ -710,6 +714,8 @@ function cpuTurn(hand, dangerZones, sqArr, oppCard1, oppCard2, oState, difficult
           if (!/[xX]/.test(sqArr[tempX][tempY])) {            
             if (/O/.test(sqArr[tempX][tempY])) {
               return ['O', pos, aCard, [tempX,tempY]];
+            } else if (isX && tempX === 4 && tempY === 2) { 
+              return ['WON', pos, aCard, [tempX, tempY]];
             } else if (sqArr[tempX][tempY] === 'o') {
               calcMoves.push(['o', pos, aCard, [tempX,tempY]]);
             } else {
@@ -725,6 +731,7 @@ function cpuTurn(hand, dangerZones, sqArr, oppCard1, oppCard2, oState, difficult
           return calcMoves[i];
         }
       }
+      //If not moves, return no moves. Else return random move. 
       if (calcMoves.length < 1) {
         return [];
       } else {
