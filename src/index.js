@@ -22,7 +22,8 @@ const rooster = require('./img/rooster.png');
 const ox = require('./img/ox.png');
 const cobra = require('./img/cobra.png');
 const regexO = /[oO]/;
-const xXs = ['x1', 'x2', 'x3', 'x4'];
+const regexX = /[xX]/;
+const xXs = ['X', 'x1', 'x2', 'x3', 'x4'];
 const oOs = ['O', 'o1', 'o2', 'o3', 'o4'];
 
 
@@ -121,8 +122,7 @@ class Game extends Component {
                 o4: {
                       isCaptured: false,
                       position: [4,4]
-                    },
-      dangerZone: {}
+                    }
       }
     };
   }
@@ -172,7 +172,6 @@ class Game extends Component {
         }
       }
       //if is oO & nothing selected, get valid squares
-      //if(regexO.test(squares[x][y]) && (!this.state.pieceIsSelected || regexO.test(squares[x][y]))) { //clicked your own piece when nothing was clicked before
       if(regexO.test(squares[x][y])) {
         if(this.state.p1CardIndex >= 0){
           let cardName = this.state.player1Cards[this.state.p1CardIndex],
@@ -186,8 +185,25 @@ class Game extends Component {
         }
       } else if (this.state.pieceIsSelected && isValid) { //moving your piece to a valid location
         isCpuTurn = true;
-        let newXstate = Object.assign({}, this.state.xState);
-        if(squares[x][y] === 'x'){
+
+
+        //TODO: x not getting captured
+        let newXstate = Object.assign({}, this.state.xState),
+            newOstate = Object.assign({}, this.state.oState),
+            tempDeck,
+            prevX = this.state.selected[0],
+            prevY = this.state.selected[1];
+
+        squares[x][y] = squares[prevX][prevY] === 'O' ? 'O':'o';
+        squares[prevX][prevY] = '';
+
+        for (let i=0; i<oOs.length; i++){
+          if(newOstate[oOs[i]].position[0] === prevX && newOstate[oOs[i]].position[1] === prevY){
+            newOstate[oOs[i]].position = [x,y];
+          }
+        }
+
+        if(regexX.test(squares[x][y])){
           for (let i=0; i<xXs.length; i++){
             if(!this.state.xState[xXs[i]].isCaptured){
               if(this.state.xState[xXs[i]].position[0] === x && this.state.xState[xXs[i]].position[1] === y){
@@ -196,48 +212,31 @@ class Game extends Component {
               }
             }
           }
-
+        }
           //TODO: can rework this to xXs include 'X'
-          if(newXstate.X.isCaptured === true){
-
-          }
-          //TODO: create function moveToSqr for move and capture of a piece
-
-        } else if (squares[x][y] === 'X'){
+        if(newXstate.X.isCaptured === true){
           newXstate.X.isCaptured = true;
           console.log("you won?"); 
           await this.setState({winner: 'player1',
                                 validSquares: [x,y],
                                 squares: squares,
-                                xState: newXstate
+                                xState: newXstate,
+                                oState: newOstate,
+                                selected: '',
+                                pieceIsSelected: false,
           });
         } else {
-
-          //TODO: Have not won also did not capture 'x'. Resolve move. moveToSqr
-
-        }
-
-        let tempDeck;
-        //set new position for display
-        let prevX = this.state.selected[0];
-        let prevY = this.state.selected[1];
-        squares[x][y] = squares[prevX][prevY] === 'O' ? 'O':'o';
-        squares[prevX][prevY] = '';
-
-        let newOstate = Object.assign({}, this.state.oState); 
-
-        for (let i=0; i<oOs.length; i++){
-          if(newOstate[oOs[i]].position[0] === prevX && newOstate[oOs[i]].position[1] === prevY){
-            newOstate[oOs[i]].position = [x,y];
-          }
-        }
-
-        await this.setState({selected: '',
+          await this.setState({selected: '',
                               pieceIsSelected: false,
                               validSquares: '',
                               xState: newXstate,
                               oState: newOstate
-        });
+          });
+        }
+
+
+
+        
         //TODO: checkwincondition position 0,2;
         // if(false){
          
@@ -292,6 +291,8 @@ class Game extends Component {
             nextCard, handCopy, tempSqr1, tempSqr2;
 
         //before calling cpuTurn, find the danger zones.
+        console.log('before: ', dangerZones);
+
         if(this.state.difficulty === 'hard'){
           for(let i=0; i<oOs.length; i++){
             if(!newOstate[oOs[i]].isCaptured){
@@ -316,17 +317,17 @@ class Game extends Component {
               //The following is all moves that 'o' and 'O' can do
               tempSqr1.forEach((myArr)=>{
                 if(!dangerZones.hasOwnProperty(myArr)){
-                  dangerZones[myArr] = [newOstate[oOs[i]].position[0]];
-                } else {
-                  dangerZones[myArr].push(newOstate[oOs[i]].position[0]);
+                  dangerZones[myArr] = [oOs[i]];
+                } else if (dangerZones[myArr].indexOf(oOs[i]) < 0) {
+                  dangerZones[myArr].push(oOs[i]);
                 }
               });
 
               tempSqr2.forEach((myArr)=>{
                 if(!dangerZones.hasOwnProperty(myArr)){
-                  dangerZones[myArr] = [newOstate[oOs[i]].position[0]];
-                } else {
-                  dangerZones[myArr].push(newOstate[oOs[i]].position[0]);
+                  dangerZones[myArr] = [oOs[i]];
+                } else if (dangerZones[myArr].indexOf(oOs[i]) < 0) {
+                  dangerZones[myArr].push(oOs[i]);
                 }
               });
 
@@ -334,7 +335,8 @@ class Game extends Component {
           }
         }
 
-        console.log(dangerZones);
+        console.log('after: ', dangerZones);
+
         
 
         const cpu = cpuTurn.call(this, "player2Cards", dangerZones, squares, oppCard1, oppCard2, this.state.oState, this.state.difficulty);
@@ -624,42 +626,35 @@ function cpuTurn(hand, dangerZones, sqArr, oppCard1, oppCard2, oState, difficult
       card2 = this.state[hand][1],
       card1moves = this.state.cards[this.state[hand][0]],
       card2moves = this.state.cards[this.state[hand][1]],
-      x1move = [];
-      priority = {};
+      xMoves = [],
+      priority = false,
+      isX = false;
   const arrayOfAvailableMoves = [],
-        oCaptureMove = [];
+        oCaptureMove = [],
+        currentOState = Object.assign({}, oState);
 
-  //TODO bring 'X' into xXs
-  for (let i=0; i<xXs.length; i++){
-    if(!this.state.xState[xXs[i]].isCaptured){
-      x1move = calculateMoves(this.state.xState[xXs[i]].position, card1, card1moves, card2, card2moves, false);
-      if(x1move[0] === ('O')){
-        return x1move;
-      } else if (x1move.length > 0) {
-        arrayOfAvailableMoves.push(x1move);      
+  for (let i=0; i<xXs.length; i++) {
+    if(!this.state.xState[xXs[i]].isCaptured) {
+      isX = xXs === 'X';
+      xMoves = calculateMoves(this.state.xState[xXs[i]].position, card1, card1moves, card2, card2moves, isX);
+      if (xMoves[0] === 'WON' ||  xMoves[0] === 'DANGER') {
+        return xMoves;
+      } else if (xMoves.length > 0) {
+        arrayOfAvailableMoves.push(xMoves);      
       }
     }
   }
 
-  let Xmove = calculateMoves(this.state.xState.X.position, card1, card1moves, card2, card2moves, true);
-  if (Xmove[0] === 'WON' || Xmove[0] === 'DANGER' || Xmove[0] === 'O'){
-    return Xmove;
-  } else if (arrayOfAvailableMoves.length < 4){
-    arrayOfAvailableMoves.push(Xmove); //X now potentially moves at random
-  }
-
-  //create array of capturing moves;
-  for(let i in arrayOfAvailableMoves){
-    if (arrayOfAvailableMoves[i][0] === 'o'){
+  for (let i in arrayOfAvailableMoves) {
+    if (arrayOfAvailableMoves[i][0] === 'priority') {
+      return arrayOfAvailableMoves[i];
+    } else if (arrayOfAvailableMoves[i][0] === 'o') {
       oCaptureMove.push(arrayOfAvailableMoves[i]);
     }
   }
 
-  //not capturing 'O' so check for 'o'. Else perform random move
-  if(oCaptureMove.length > 0 ){
+  if(oCaptureMove.length > 0){
     return oCaptureMove[Math.floor(Math.random() * oCaptureMove.length)];
-  } else if (arrayOfAvailableMoves.length === 0){
-    return Xmove;
   } else {
     return arrayOfAvailableMoves[Math.floor(Math.random() * arrayOfAvailableMoves.length)];
   }
@@ -668,61 +663,80 @@ function cpuTurn(hand, dangerZones, sqArr, oppCard1, oppCard2, oState, difficult
     let aMove = calcMove(card1, move1);
     let bMove = calcMove(card2, move2);
 
-    if ((aMove.length < 2 && bMove.length > 2) || bMove[0] === 'O' || bMove[0] === 'o' || bMove[0] === 'WON') {
+    if (bMove[0] === 'WON' || bMove[0] === 'DANGER') { //win or imminent danger, move to safety
       return bMove;
-    } else if ((bMove.length < 2 && aMove.length > 2) || aMove[0] === 'O' || aMove[0] === 'o' || aMove[0] === 'WON'){
+    } else if (aMove[0] === 'WON' || aMove[0] === 'DANGER'){
+      return aMove;
+    } else if (aMove === 'priority') { //attack the imminent threat to remove danger
+      return aMove;
+    } else if (bMove === 'priority') {
+      return bMove;
+    } else if (aMove === 'danger') { //have to move, no capturing moves
+      return aMove;
+    } else if (bMove === 'danger') {
+      return bMove;
+    } else if ((aMove.length < 2 && bMove.length > 2) || bMove[0] === 'o') {
+      return bMove;
+    } else if ((bMove.length < 2 && aMove.length > 2) || aMove[0] === 'o'){
       return aMove;
     } else if(aMove.length < 2 && bMove.length < 2) {
       return [];
     } else {
-      return Math.random() > 0.49 ? aMove : bMove;
+      return Math.random() > 0.49999 ? aMove : bMove;
     }
 
     function calcMove(aCard, aMove) {
-      let tempX, tempY, oDangerX, oDangerY;
+      let tempX, tempY, oDangerX, oDangerY, nextPositionX;
+
       const calcMoves = [];
-      for (let i = 0; i < aMove.length; i++){
+      for (let i = 0; i < aMove.length; i++) {
         tempX = pos[0] + aMove[i][1]; //
         tempY = pos[1] - aMove[i][0]; //
 
-        //Checks if Master moves to gate.
-
-        if (isX && difficulty === "hard") {
-
-          //This is just aMove => tempX.
-          //Need to implement oppCard1 & oppCard2
-          // oDangerX = pos[0] + aMove[i][1];// actually Y-axis 
-          // oDangerY = pos[1] - aMove[i][0];// actually X-axis
-          if (dangerZones.hasOwnProperty([pos[0],pos[1]])) {
-            //'X' is capturable here. Find array of moves for 'X' or capture the piece that can capture it.
-
-            if (!dangerZones.hasOwnProperty([tempX, tempY])) {
-              return ['DANGER', pos, aCard, [tempX,tempY]];
-            } else {
-              //NowDo
-              if (!priority.hasOwnProperty([tempX, tempY])) {
-                priority[tempX,tempY] = dangerZones[[tempX, tempY]];
-              }
-              continue;
-            }
-          }
-        }
-
+        //Special X calcs
         if (tempX > 4 || tempX < 0 || tempY > 4 || tempY < 0) {
           continue;
-        } else {
-          if (!/[xX]/.test(sqArr[tempX][tempY])) {            
-            if (/O/.test(sqArr[tempX][tempY])) {
-              return ['O', pos, aCard, [tempX,tempY]];
-            } else if (isX && tempX === 4 && tempY === 2) { 
-              return ['WON', pos, aCard, [tempX, tempY]];
-            } else if (sqArr[tempX][tempY] === 'o') {
-              calcMoves.push(['o', pos, aCard, [tempX,tempY]]);
-            } else {
-              calcMoves.push(['empty', pos, aCard, [tempX,tempY]]);
-            }
-          }
+        } else if ((isX && tempX === 4 && tempY === 2 && sqArr[tempX][tempY] !== 'x') || sqArr[tempX][tempY] === 'O') { 
+          return ['WON', pos, aCard, [tempX, tempY]];
         }
+
+        if (isX && difficulty === "hard") { //REMEMBER TO CONTINUE, don't fall through
+          if (dangerZones.hasOwnProperty([pos[0],pos[1]])) {
+            //'X' is capturable here. Find array of moves for 'X' or capture the piece that can capture it.
+            let currentPositionX = [pos[0],pos[1]];
+            let nextPositionX = [tempX, tempY];
+            if(dangerZones[currentPositionX].length > 1 && !dangerZones.hasOwnProperty([tempX,tempY]) && !regexX.test(sqArr[tempX][tempY])){
+              return ['DANGER', pos, aCard, [tempX,tempY]]; //move bitch get out da way
+            } else if (dangerZones[currentPositionX].length === 1) {
+              if(!priority){
+                priority = dangerZones[currentPositionX][0];
+              }
+              if(tempX === pos[0] && tempY === pos[1] && !dangerZones[nextPositionX]){
+                return ['DANGER', pos, aCard, [tempX, tempY]]; //capture move that's safe
+              } else if (!dangerZones[nextPositionX]) {
+                calcMoves.push(['danger', pos, aCard, [tempX,tempY]]);
+              }
+              continue;
+            } else {  //there's more than 1 piece threatening X
+
+            }
+          } else {//if no danger and no winning move for X. fall through to:
+            //TODO: calculate 2 moves ahead to try and move to gate SAFELY
+          }
+          
+        } else { 
+
+        }
+
+        if (sqArr[tempX][tempY] === 'o') {
+          if(currentOState[priority] === [tempX,tempY]){
+            return ['priority', pos, aCard, [tempX,tempY]]
+          } else {
+            calcMoves.push(['o', pos, aCard, [tempX,tempY]]);
+          }
+        } else {
+          calcMoves.push(['empty', pos, aCard, [tempX,tempY]]);
+        }    
       }
 
       //this added step for capturing 'o' comes after checking to see if capturing 'O' is possible
@@ -818,7 +832,7 @@ function findConstCard(card) {
   } else if (card === 'Ox'){
     return ox;
   } else if (card === 'Cobra'){
-    return cobra
+    return cobra;
   }
   return null;
 }
