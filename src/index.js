@@ -216,7 +216,7 @@ class Game extends Component {
             newOstate[oOs[i]].position = [x,y];
           }
         }
-        if (newOstate.O.position[0] === 0 && newOstate.O.position === 2) {
+        if (newOstate.O.position[0] === 0 && newOstate.O.position[1] === 2) {
           winner = 'player1';
         }
 
@@ -420,6 +420,10 @@ class Board extends Component {
     }
   }
 
+  onHover(x,y) {
+
+  }
+
   renderSquare(x,y) {
     let classSqr = "square";
     
@@ -431,13 +435,14 @@ class Board extends Component {
     //   }
     // }
 
+    //TODO: CSS for opponent moves
+
     if(this.props.theState.pieceIsSelected){
       for (let i = 0; i<this.props.theState.validSquares.length; i++){
         if(this.props.theState.validSquares[i][0] === x && this.props.theState.validSquares[i][1] === y) {
           classSqr = "square pointer";
         }
       }
-    } else {
       if(this.props.theState.squares[x][y] === 'o' || this.props.theState.squares[x][y] === 'O') {
         classSqr = "square pointer";
       }
@@ -446,13 +451,12 @@ class Board extends Component {
     if(this.props.theState.selected[0] === x && this.props.theState.selected[1] === y){
       classSqr = `square active pointer`;
     }
-    //TODO: CSS for opponent moves
     if(this.props.theState.cpuMoves.length > 0) {
       if((this.props.theState.cpuMoves[0][0] === x && this.props.theState.cpuMoves[0][1] === y) || (this.props.theState.cpuMoves[1][0] === x && this.props.theState.cpuMoves[1][1] === y)){
         classSqr = `square cpuMove`;
       }
+      //TODO: add onhover event
     }
-
 
     //TODO: If game over display winning move
     /*
@@ -467,6 +471,11 @@ class Board extends Component {
       
     }
     */
+    if(x===0 && y===2){
+      classSqr += " redGate";
+    } else if(x===4 && y===2) {
+      classSqr += ' blueGate';
+    }
     return <Square active={classSqr} value={this.props.theState.squares[x][y]} onClick={() => this.props.onClick('square',x,y)} />;  
   }
 
@@ -479,7 +488,7 @@ class Board extends Component {
     let p2lastcard = findConstCard(this.props.theState.p2LastUsed);
     let p1nextcard = findConstCard(this.props.theState.nextCard);
 
-    let lastUsedHeader = this.props.theState.p2LastUsed.length > 0 ? <h2 className="lastUsedHeader">Opponent Last Used: </h2> : null;
+    let lastUsedHeader = this.props.theState.p2LastUsed.length > 0 ? <h2 className="lastUsedHeader">Opponent Last Used </h2> : null;
     let lastUsed = this.props.theState.p2LastUsed.length > 0 ? <Card className="last-card upside-down" card={this.props.theState.p2LastUsed} src={p2lastcard}/> : null;
     let selectCardPrompt = this.props.theState.p1CardIndex >= 0 ? null : <h2 className="highlight">Please select one of your cards cards below to BEGIN!</h2>;
     if(this.props.theState.winner){
@@ -537,10 +546,14 @@ class Board extends Component {
           </div>
         </div>
         <div id="status-cards">
-          {lastUsedHeader}
-          {lastUsed}
-          <Card className="next-card" card={this.props.theState.nextCard} src={p1nextcard}/>
-          <h2>Your Next Card</h2>
+          <div id="last-card">
+            {lastUsedHeader}
+            {lastUsed}
+          </div>
+          <div id="next-card">
+            <h2 className="nextHeader">Your Next Card</h2>
+            <Card className="next-card" card={this.props.theState.nextCard} src={p1nextcard}/>
+          </div>
         </div>
       </div>
     );
@@ -597,6 +610,9 @@ Functions
 
 TODO: Currenty X doesn't move unless in danger, not even to captuer a 'o'. 
       Update which card is the new card / what card did cpu just draw
+TOFIX:
+      'X' Runs rather than prioritizes capturing threat
+      'X' causes errors if only piece left and unwilling to put self in danger
 
 ==============================================================================================
 */
@@ -608,7 +624,6 @@ function cpuTurn(hand, dangerZones, sqArr, oppCard1, oppCard2, oState, difficult
       card2moves = this.state.cards[this.state[hand][1]],
       xMoves = [],
       priority = false,
-      prioFound = false,
       isX = false;
   const arrayOfAvailableMoves = [],
         moveType = {},
@@ -650,17 +665,25 @@ function cpuTurn(hand, dangerZones, sqArr, oppCard1, oppCard2, oState, difficult
     let aMove = calcMove(card1, move1);
     let bMove = calcMove(card2, move2);
 
-    if (bMove[0] === 'WON' || bMove[0] === 'DANGER') { //win or imminent danger, move to safety
+    if(aMove.length === 0) {
+      return bMove;
+    } else if(bMove.length === 0){
+      return aMove;
+    } else if (bMove[0] === 'WON' || bMove[0] === 'DANGER') { //win or imminent danger, move to safety
       return bMove;
     } else if (aMove[0] === 'WON' || aMove[0] === 'DANGER'){
       return aMove;
-    } else if (aMove === 'priority') { //attack the imminent threat to remove danger
+    } else if (aMove === 'priority' || aMove === 'safeo') { //attack the imminent threat to remove danger
       return aMove;
-    } else if (bMove === 'priority') {
+    } else if (bMove === 'priority' || bMove === 'safeo') {
       return bMove;
-    } else if ((aMove.length < 2 && bMove.length > 2) || bMove[0] === 'o') {
+    } else if (bMove[0] === 'safe') {
       return bMove;
-    } else if ((bMove.length < 2 && aMove.length > 2) || aMove[0] === 'o'){
+    } else if (aMove[0] === 'safe'){
+      return aMove;
+    } else if (bMove[0] === 'o') {
+      return bMove;
+    } else if (aMove[0] === 'o'){
       return aMove;
     } else if(aMove.length < 2 && bMove.length < 2) {
       return [];
@@ -669,8 +692,9 @@ function cpuTurn(hand, dangerZones, sqArr, oppCard1, oppCard2, oState, difficult
     }
 
     function calcMove(aCard, aMove) {
-      let tempX, tempY, oDangerX, oDangerY, nextPositionX;
+      let tempX, tempY, nextPositionX;
       const calcMoves = [];
+      const dangerous = [];
 
       for (let i = 0; i < aMove.length; i++) {
         tempX = pos[0] + aMove[i][1]; //
@@ -682,23 +706,35 @@ function cpuTurn(hand, dangerZones, sqArr, oppCard1, oppCard2, oState, difficult
         } else if ((isX && tempX === 4 && tempY === 2) || sqArr[tempX][tempY] === 'O') { 
           return ['WON', pos, aCard, [tempX, tempY]];
         } else if (isX && difficulty === "hard") {
-          if (dangerZones.hasOwnProperty([tempX,tempY])) {
-            console.log('ping');
-            console.log('x: ', tempX, ' ---- y: ', tempY);
+
+          if (dangerZones.hasOwnProperty([nextPositionX])) { //next spot is threatened
+            console.log("I'm in danger and can go to : ", tempX,',',tempY);
+            dangerous.push(['dangerous', pos, aCard, [tempX,tempY]]);
             continue;
-          } else if (dangerZones[currentPositionX]) {
-            if (!priority) {
-              return ['DANGER', pos, aCard, [tempX,tempY]]; //move bitch get out da way   
-            } else {
-              if (priority[0] === tempX && priority[1] === tempY) {
+          } else {
+            
+            if (dangerZones[currentPositionX]) {
+
+              if (!priority) {
+                return ['DANGER', pos, aCard, [tempX,tempY]]; //move bitch get out da way   
+              } else if (priority[0] === tempX && priority[1] === tempY) {
                 return ['priority', pos, aCard, [tempX,tempY]];
-              } 
-            }
-          } 
-          calcMoves.push(['empty', pos, aCard, [tempX,tempY]]);
-        } else if (difficulty === 'hard' && priority && !prioFound){
+              } else if (sqArr[tempX][tempY] === 'o') {
+                return ['safeo', pos, aCard, [tempX,tempY]];
+              } else { //not 2 threats, can't capture the threat, but the next position is safe
+                calcMoves.push(['safe', pos, aCard, [tempX,tempY]]);
+              }
+            } else { //current position is safe and next position is safe
+              if (sqArr[tempX][tempY] === 'o') {
+                calcMoves.push(['o', pos, aCard, [tempX,tempY]]);
+              } else {
+                calcMoves.push(['empty', pos, aCard, [tempX,tempY]]);
+              }
+            } 
+          }
+          // if()
+        } else if (difficulty === 'hard' && priority){
           if (priority[0] === tempX && priority[1] === tempY) {
-            prioFound = true;
             return ['priority', pos, aCard, [tempX, tempY]];
           } else if (sqArr[tempX][tempY] === 'o') {
             calcMoves.push(['o', pos, aCard, [tempX,tempY]]);
@@ -720,8 +756,10 @@ function cpuTurn(hand, dangerZones, sqArr, oppCard1, oppCard2, oState, difficult
           return calcMoves[i];
         }
       }
-      //If not moves, return no moves. Else return random move. 
-      if (calcMoves.length < 1) {
+      //If not moves, return no moves. Else return random move.
+      if (isX && calcMoves.length === 0) {
+        return dangerous[Math.floor(Math.random()*dangerous.length)];  
+      } else if (calcMoves.length < 1) {
         return [];
       } else {
         return calcMoves[Math.floor(Math.random()*calcMoves.length)];  

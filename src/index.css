@@ -19,7 +19,8 @@ ol, ul {
 
 #game-board {
   /*margin: auto;*/
-  margin-bottom: 20px;
+
+  margin: 15px 0px;
 }
 
 .board-row:after {
@@ -27,7 +28,7 @@ ol, ul {
   content: "";
   display: table;
   /*overflow: auto;*/
-  min-width: 450px;
+  min-width: 345px;
 }
 
 .status {
@@ -102,6 +103,13 @@ ol, ul {
   flex-direction: row;
 }
 
+.redGate {
+  border-top: 10px solid red;
+}
+.blueGate {
+  border-bottom: 10px solid blue;
+}
+
 .lineup {
   float:left;
   display: inline-block;
@@ -110,66 +118,94 @@ ol, ul {
   margin: auto;
 }
 
+#status-cards {
+  display: inline;
+  text-align: center;
+  max-height: 700px;
+  margin: auto;
+}
+
 .card-name {
   margin: auto;
   margin-bottom: 5px;
+  font-size: 16px;
   text-align: center;
   padding: 2px 2px;
   border: 1px solid black;
   border-radius: 2px;
-  width: 130px;
+  width: 100px;
+  /*background-color: #999;*/
 }
 
 .card1 {
-  float: left;
+  /*float: left;*/
   display: inline-block;
   margin: auto;
   margin-right: 1px;
   width: 155px;
   height: auto;
+  /*background-color: #BEB;*/
 }
 
 .card2 {
   float: right;
   display: inline-block;
+  margin: auto;
   clear: right;
   width: 155px;
   height: auto;
+  /*background-color: #EBB;*/
 }
 
-.next-card {
+/*.next-card {
   text-align: center;
   float: right;
   display: inline-block;
   clear: right;
   width: auto;
   margin-top: 100px;
+}*/
+.nextHeader {
+  margin: 5px 0px;
+  max-height: 100px;
 }
-
 .lastUsedHeader {
-  margin-top: -100px;
+  /*margin-top: -100px;*/
+  /*margin: 190px 0px;*/
+  margin: 30px 0px;
+  max-height: 100px;
 }
 
 .last-card {
+  float: top;
   text-align: center;
   height: 250px;
   margin-top: -50px;
+  margin-bottom: 100px;
+  max-height: 190px;
+
+}
+
+.next-card {
+  max-height: 150px;
+  float: bottom;
 }
 
 #player-box {
-  font: 10px "Century Gothic", Futura, sans-serif;
-  width: 410px;
-  height: 202px;
+  font: 8px "Century Gothic", Futura, sans-serif;
+  margin-left: -1px;
+  width: 323px;
+  /*height: 202px;*/
+  /*background-color: blue;*/
 }
 
-#status-cards {
-  display: inline;
-  margin: auto;
-  
-}
+
+
+
 
 img {
-  width: 99%;
+  margin: 0px 17px;
+  width: 79%;
   height: auto;
   border: 2px solid black;
 }
